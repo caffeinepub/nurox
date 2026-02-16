@@ -1,4 +1,9 @@
 {
-  "frontend/src/domain/mappers.ts": "Provides mapping functions between backend Trade/TradeView types and UI domain models, including form data to Trade conversion with discipline violation tracking and derived metric calculations.",
-  "frontend/src/index.css": "Global CSS file with Tailwind directives and OKLCH-based design tokens for a premium black-and-gold trading terminal theme, supporting both dark and light modes with consistent color variables for all UI components."
+  "frontend/src/domain/mappers.ts": "Mapping functions between backend Trade types and UI domain models, including form data to Trade conversion with discipline violation tracking and derived metric calculations; strategy field now maps dynamically.",
+  "frontend/src/index.css": "Global CSS file with Tailwind directives and OKLCH-based design tokens for a premium black-and-gold trading terminal theme, supporting both dark and light modes with consistent color variables for all UI components.",
+  "frontend/src/utils/strategyPresets.ts": "Utility function to parse newline-delimited strategy presets text into a clean, de-duplicated array of strategy names with trimming and empty line removal.",
+  "frontend/src/domain/types.ts": "TypeScript type definitions for the trading journal domain, including TradeFormData with dynamic strategy field (changed from fixed union to string), performance metrics, and UI-specific trade extensions.",
+  "frontend/src/components/journal/TradeFormDialog.tsx": "Trade form dialog component that sources strategy dropdown options exclusively from user's saved Settings strategy presets, handles empty presets state with guidance message, and preserves legacy strategy values when editing existing trades.",
+  "frontend/src/pages/SettingsPage.tsx": "Settings page component for configuring trading preferences including default account values, risk parameters, and strategy presets; removed hardcoded default strategyPresets value to ensure users explicitly manage strategies.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including trades, settings, and user profiles with proper cache invalidation on mutations; settings query supports immediate UI refresh after save."
 }

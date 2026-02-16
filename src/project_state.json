@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
+  "projectStateVersion": 5,
   "summary": "Build Nurox: a premium black/gold professional trading journal + analytics web app (React+TS) with Internet Identity login, Motoko canister storage, performance dashboard, advanced trade journal with accurate forex calculations, risk tools, discipline/rule tracking, settings, and a simple rule-based chatbot.",
   "architectural_notes": [
     "Use Internet Identity for authentication; redirect into Nurox after successful login.",
@@ -8,11 +8,11 @@
     "Keep calculation logic (forex/risk/performance metrics) in dedicated utility modules separate from UI components.",
     "Store trade data as structured objects; derive equity curve as a balance array computed from trades.",
     "Charts implemented via Chart.js (or similar) fed from computed analytics outputs.",
-    "Simple rule-based chatbot (non-AI) reads computed stats/analytics and answers predefined query patterns."
+    "Simple rule-based chatbot (non-AI) reads computed stats/analytics and answers predefined query patterns.",
+    "Journal New Trade strategy selector must be populated exclusively from user-saved Strategy Presets stored in Settings (no free-text/manual add in Journal); updates become available after Settings Save and persistence."
   ],
   "known_issues": [],
   "isFixRequest": false,
-  "imageRequirements": "## Edit Images\n- Create transparent PNG + favicon/icon variants (Logo 5.jpg > nurox-logo-transparent.dim_1024x1024.png)\n- Create favicon from logo (Logo 5.jpg > nurox-favicon.dim_64x64.png)\n- Create square app icon from logo (Logo 5.jpg > nurox-app-icon.dim_512x512.png)",
   "existing_features": [
     {
       "id": "feature-implement-internet-identity-authentication-and-gated-routing-so-users-must-sign-in-before-accessing-nurox-after-successful-sign-in-redirect-the-user-to-the-main-dashboard",
@@ -117,6 +117,38 @@
         "REQ-14"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-journal-new-trade-form-so-the-strategy-dropdown-options-are-sourced-exclusively-from-the-authenticated-user-s-saved-settings-strategy-presets-persisted-after-the-user-clicks-save-settings-instead-of-a-hardcoded-list",
+      "title": "Update the Journal New Trade form so the Strategy dropdown options are sourced exclusively from the authenticated user’s saved Settings → Strategy Presets (persisted after the user clicks Save Settings), instead of a hardcoded list.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-parse-settings-strategypresets-stored-as-a-newline-delimited-string-into-a-clean-list-for-the-strategy-dropdown-by-trimming-whitespace-removing-empty-lines-and-de-duplicating-identical-entries-case-sensitive-or-case-insensitive-must-be-consistent-within-the-app",
+      "title": "Parse Settings.strategyPresets (stored as a newline-delimited string) into a clean list for the Strategy dropdown by trimming whitespace, removing empty lines, and de-duplicating identical entries (case-sensitive or case-insensitive must be consistent within the app).",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-adjust-frontend-domain-typing-so-tradeformdata-strategy-can-support-dynamic-preset-values-loaded-from-settings-rather-than-a-fixed-typescript-union-of-hardcoded-strategy-strings",
+      "title": "Adjust frontend domain typing so TradeFormData.strategy can support dynamic preset values loaded from Settings (rather than a fixed TypeScript union of hardcoded strategy strings).",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-handle-the-empty-presets-state-in-the-new-trade-form-if-settings-has-no-strategy-presets-saved-empty-list-the-strategy-field-must-make-it-clear-the-user-needs-to-add-presets-in-settings-and-must-prevent-selecting-arbitrary-strategies-from-the-journal",
+      "title": "Handle the empty-presets state in the New Trade form: if Settings has no strategy presets saved (empty list), the Strategy field must make it clear the user needs to add presets in Settings and must prevent selecting arbitrary strategies from the Journal.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -192,6 +224,12 @@
       "reqIds": [
         "REQ-2"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Wire Settings → Strategy Presets to Journal New Trade strategy dropdown: users manage strategy names only in Settings; on Save, persisted presets become the only selectable options in the Journal strategy dropdown",
+      "reqIds": [],
       "status": "pending"
     }
   ],

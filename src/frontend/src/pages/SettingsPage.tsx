@@ -20,7 +20,7 @@ export default function SettingsPage() {
     defaultRiskPercent: 1,
     baseCurrency: 'USD',
     theme: 'dark',
-    strategyPresets: 'Structure Break\nLiquidity Sweep\nSupply/Demand',
+    strategyPresets: '',
   });
 
   useEffect(() => {
@@ -141,8 +141,11 @@ export default function SettingsPage() {
                 value={formData.strategyPresets}
                 onChange={(e) => setFormData({ ...formData, strategyPresets: e.target.value })}
                 rows={5}
-                placeholder="Structure Break&#10;Liquidity Sweep&#10;Supply/Demand"
+                placeholder="Order Block&#10;Liquidity Sweep&#10;Supply/Demand&#10;Structure Break"
               />
+              <p className="text-xs text-muted-foreground">
+                Enter each strategy name on a new line. These will appear in the Journal's New Trade form.
+              </p>
             </div>
           </CardContent>
         </Card>

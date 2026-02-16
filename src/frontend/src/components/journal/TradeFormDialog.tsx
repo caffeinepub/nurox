@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useGetAllTrades, useSaveTrade, useGetSettings } from '../../hooks/useQueries';
 import type { TradeFormData } from '../../domain/types';
 import { mapFormDataToTrade } from '../../domain/mappers';
+import { parseStrategyPresets } from '../../utils/strategyPresets';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,8 +12,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface TradeFormDialogProps {
   open: boolean;
@@ -27,6 +29,10 @@ export default function TradeFormDialog({ open, onClose, editingTradeId }: Trade
 
   const editingTrade = editingTradeId ? trades.find(t => t.id === editingTradeId) : undefined;
 
+  // Parse strategy presets from settings
+  const strategyPresets = settings ? parseStrategyPresets(settings.strategyPresets) : [];
+  const hasPresets = strategyPresets.length > 0;
+
   const [formData, setFormData] = useState<TradeFormData>({
     date: new Date(),
     pair: 'EURUSD',
@@ -37,7 +43,7 @@ export default function TradeFormDialog({ open, onClose, editingTradeId }: Trade
     lotSize: 0.01,
     riskPercent: settings?.defaultRiskPercent || 1,
     accountBalance: settings?.defaultAccount || 10000,
-    strategy: 'Structure Break',
+    strategy: hasPresets ? strategyPresets[0] : '',
     timeframe: 'H1',
     session: 'London',
     emotionBefore: '',
@@ -61,7 +67,7 @@ export default function TradeFormDialog({ open, onClose, editingTradeId }: Trade
         lotSize: editingTrade.positionSize,
         riskPercent: (editingTrade.riskAmount / editingTrade.accountSize) * 100,
         accountBalance: editingTrade.accountSize,
-        strategy: editingTrade.entryType as any,
+        strategy: editingTrade.entryType,
         timeframe: 'H1',
         session: 'London',
         emotionBefore: editingTrade.emotions.split('|')[0]?.replace('Before:', '').trim() || '',
@@ -77,9 +83,10 @@ export default function TradeFormDialog({ open, onClose, editingTradeId }: Trade
         ...prev,
         riskPercent: settings.defaultRiskPercent,
         accountBalance: settings.defaultAccount,
+        strategy: hasPresets ? strategyPresets[0] : '',
       }));
     }
-  }, [editingTrade, settings]);
+  }, [editingTrade, settings, hasPresets, strategyPresets]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,6 +107,12 @@ export default function TradeFormDialog({ open, onClose, editingTradeId }: Trade
       console.error(error);
     }
   };
+
+  // Build strategy options: include current presets + existing trade strategy if editing
+  const strategyOptions = [...strategyPresets];
+  if (editingTrade && editingTrade.entryType && !strategyOptions.includes(editingTrade.entryType)) {
+    strategyOptions.push(editingTrade.entryType);
+  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -154,21 +167,34 @@ export default function TradeFormDialog({ open, onClose, editingTradeId }: Trade
 
               <div className="space-y-2">
                 <Label htmlFor="strategy">Strategy</Label>
-                <Select
-                  value={formData.strategy}
-                  onValueChange={(value: any) => setFormData({ ...formData, strategy: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Structure Break">Structure Break</SelectItem>
-                    <SelectItem value="Liquidity Sweep">Liquidity Sweep</SelectItem>
-                    <SelectItem value="Supply/Demand">Supply/Demand</SelectItem>
-                    <SelectItem value="Trend Following">Trend Following</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                {strategyOptions.length > 0 ? (
+                  <Select
+                    value={formData.strategy}
+                    onValueChange={(value: string) => setFormData({ ...formData, strategy: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select strategy" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {strategyOptions.map((strategy) => (
+                        <SelectItem key={strategy} value={strategy}>
+                          {strategy}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <>
+                    <Select disabled>
+                      <SelectTrigger>
+                        <SelectValue placeholder="No strategies available" />
+                      </SelectTrigger>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Add strategy presets in Settings to enable strategy selection
+                    </p>
+                  </>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -283,6 +309,15 @@ export default function TradeFormDialog({ open, onClose, editingTradeId }: Trade
               </div>
             </div>
 
+            {!hasPresets && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  No strategy presets configured. Please add strategy presets in Settings before creating a trade.
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="emotionBefore">Emotion Before Trade</Label>
               <Input
@@ -383,7 +418,7 @@ export default function TradeFormDialog({ open, onClose, editingTradeId }: Trade
               </Button>
               <Button
                 type="submit"
-                disabled={saveTrade.isPending}
+                disabled={saveTrade.isPending || !hasPresets}
                 className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-black font-semibold"
               >
                 {saveTrade.isPending ? (

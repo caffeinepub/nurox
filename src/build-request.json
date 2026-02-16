@@ -1,316 +1,99 @@
 {
   "kind": "build_request",
-  "title": "Nurox — Professional Trading Journal & Analytics Command Center",
+  "title": "Wire Settings Strategy Presets into Journal New Trade Strategy dropdown",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Implement Internet Identity authentication and gated routing so users must sign in before accessing Nurox; after successful sign-in, redirect the user to the main dashboard.",
+      "id": "REQ-15",
+      "text": "Update the Journal New Trade form so the Strategy dropdown options are sourced exclusively from the authenticated user’s saved Settings → Strategy Presets (persisted after the user clicks Save Settings), instead of a hardcoded list.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-6",
+          "msg-8",
+          "msg-12"
         ],
         "quotes": [
-          "Use the platform’s existing login system (Internet Identity). After login, users get redirected into your Nurox dashboard."
+          "connect the setting presets to this so if we type \"order block\" in setting and in strategy preset i need this to appear in journal inside the strategy selection",
+          "1.user saved presets only",
+          "its only through setting and hit save to save it and it will appear in journal inside new trades inside strategies name in dropdown"
         ]
       },
       "acceptanceCriteria": [
-        "Unauthenticated visitors are prompted to sign in with Internet Identity before accessing the app.",
-        "After successful login, the user is redirected into the Nurox dashboard.",
-        "A visible sign-out control is available and returns the user to the signed-out state."
+        "After saving Settings with strategy presets (e.g., lines: \"Order Block\"), opening Journal → New Trade shows \"Order Block\" as a selectable Strategy option.",
+        "The Strategy dropdown in the New Trade form does not display any hardcoded strategies (e.g., no default list like “Structure Break”, “Other”, etc.) when presets exist; it only displays the saved presets.",
+        "Editing an existing trade still shows the trade’s saved strategy value selected in the Strategy field, even if it is not currently present in presets (no crash)."
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Create a Motoko backend data model and API for user-specific persistence (keyed by caller principal) to store trades, settings, and any derived metadata needed by the UI; expose CRUD methods for trades and read/update methods for settings.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "use motoko"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Trades and settings are stored per authenticated user (principal-scoped).",
-        "Backend provides create/read/update/delete for trades.",
-        "Backend provides read/update for settings (default account size, default risk %, base currency, theme toggle, strategy presets).",
-        "Data persists across page reloads and across devices for the same Internet Identity."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Define a clean, modular frontend architecture with clear separation between UI components, domain types, API/actor calls, and calculation/analytics utilities; ensure all calculations live in dedicated utility modules and are not embedded in React components.",
+      "id": "REQ-16",
+      "text": "Parse Settings.strategyPresets (stored as a newline-delimited string) into a clean list for the Strategy dropdown by trimming whitespace, removing empty lines, and de-duplicating identical entries (case-sensitive or case-insensitive must be consistent within the app).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6",
+          "msg-12"
         ],
         "quotes": [
-          "Clean modular code",
-          "All calculations in separate utility files",
-          "Clear separation between UI and calculation logic"
+          "connect the setting presets to this",
+          "hit save to save it and it will appear in journal inside new trades inside strategies name in dropdown"
         ]
       },
       "acceptanceCriteria": [
-        "Frontend has a domain/types layer for trade and settings objects.",
-        "Calculation and analytics logic is implemented in standalone utility modules.",
-        "React components call utilities/services rather than implementing math inline."
+        "Given a strategy presets textarea value containing blank lines and extra spaces, the New Trade Strategy dropdown shows only non-empty trimmed items.",
+        "Duplicate presets do not render duplicate Strategy options in the dropdown."
       ]
     },
     {
-      "id": "REQ-4",
-      "text": "Apply a premium, high-contrast black-and-gold terminal-style visual theme across the application (desktop-first, tablet compatible), using a clean modern minimal layout and consistent typography, spacing, and component styling.",
+      "id": "REQ-17",
+      "text": "Adjust frontend domain typing so TradeFormData.strategy can support dynamic preset values loaded from Settings (rather than a fixed TypeScript union of hardcoded strategy strings).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6",
+          "msg-12"
         ],
         "quotes": [
-          "Premium black and gold theme",
-          "Clean, modern, minimal interface",
-          "High contrast dashboard",
-          "Professional trading terminal feel",
-          "Responsive (desktop first, tablet compatible)"
+          "strategy preset i need this to appear in journal inside the strategy selection",
+          "it will appear in journal inside new trades inside strategies name in dropdown"
         ]
       },
       "acceptanceCriteria": [
-        "App uses a consistent black/gold premium theme with high contrast and minimal visual noise.",
-        "Primary layouts are optimized for desktop and remain usable on tablets.",
-        "Typography, spacing, and component variants look coherent across all pages."
+        "The frontend builds without TypeScript errors after making Strategy presets dynamic.",
+        "Saving a trade with a preset strategy stores the selected strategy value into the trade’s entryType field (via existing mapping) and it appears in the Journal table/search as before."
       ]
     },
     {
-      "id": "REQ-5",
-      "text": "Incorporate the uploaded Nurox logo into the application shell (e.g., login header/app top bar) and provide favicon/app icon assets derived from it as static frontend assets.",
+      "id": "REQ-18",
+      "text": "Handle the empty-presets state in the New Trade form: if Settings has no strategy presets saved (empty list), the Strategy field must make it clear the user needs to add presets in Settings and must prevent selecting arbitrary strategies from the Journal.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-3"
+          "msg-10",
+          "msg-12"
         ],
         "quotes": [
-          "The user has uploaded 1 image(s): Logo 5.jpg."
+          "Strategy names should be created only in Settings",
+          "its only through setting"
         ]
       },
       "acceptanceCriteria": [
-        "Logo is displayed in the app header and/or login screen with appropriate sizing for desktop/tablet.",
-        "A favicon is present and derived from the uploaded logo.",
-        "Logo assets are served from frontend static assets (not via backend)."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Implement the Advanced Trading Journal: a trade entry form that captures all specified trade fields, supports screenshot upload, and supports editing/deleting trades; include sorting, filtering, search, tagging, and highlighting of rule violations.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Advanced Trading Journal",
-          "Trade Entry Fields: Date, Pair, Direction (Buy / Sell), Entry Price, Stop Loss, Take Profit, Lot Size, Risk %, Account Balance Before Trade, Strategy Type, Timeframe, Session, Emotion Before Trade, Emotion After Trade, Screenshot Upload, Notes",
-          "Sort and Filter",
-          "Search",
-          "Edit/Delete Trade",
-          "Tag trades",
-          "Highlight rule violations"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Trade create form includes all required fields and validates required inputs.",
-        "Trades can be edited and deleted and changes persist via the backend.",
-        "Journal list supports sorting, filtering, and free-text search.",
-        "Trades can be tagged and tags are persisted.",
-        "Trades with rule violations are visually highlighted in the list and in trade details.",
-        "Screenshot upload is supported with a documented size limit and persists per trade."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Implement mathematically accurate forex/trading calculation utilities for trade-level metrics: risk amount, stop distance, RR ratio, profit/loss, balance after trade, and percentage gain/loss; ensure the lot size formula matches: Lot Size = Risk Amount / (Stop Distance × Pip Value).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Automatic Calculations: Risk Amount, RR Ratio, Profit/Loss, Balance After Trade, Percentage Gain/Loss",
-          "Lot Size formula must follow: Lot Size = Risk Amount / (Stop Distance × Pip Value)",
-          "All formulas must be mathematically accurate for forex trading."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Lot size computation uses exactly: Lot Size = Risk Amount / (Stop Distance × Pip Value).",
-        "Trade save flow computes and stores derived values (at minimum: Risk Amount, RR, P/L, Balance After, % Gain/Loss).",
-        "Utilities are unit-testable (pure functions) and not coupled to UI components."
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Build the Main Dashboard (Command Center) that displays all required KPIs and renders charts for equity curve, monthly performance, pair distribution, and session performance based on stored trades.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Main Dashboard (Command Center) Display: Total Trades, Win Rate (%), Loss Rate (%), Net Profit/Loss, Profit Factor, Expectancy, Average RR, Maximum Drawdown, Current Win/Loss Streak, Best Trade, Worst Trade, Risk Consistency Score, Discipline Score",
-          "Charts: Equity Curve (Line Chart), Monthly Performance (Bar Chart), Pair Distribution (Pie Chart), Session Performance (Asia / London / New York)"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Dashboard shows all requested KPIs computed from the user’s stored trades.",
-        "Equity curve chart renders from an equity/balance series derived from trades.",
-        "Monthly performance bar chart groups results by month.",
-        "Pair distribution pie chart groups by trading pair.",
-        "Session performance chart groups by session (Asia/London/New York)."
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Implement the Performance Analytics Engine to compute portfolio/journal statistics (win rate, average win/loss, expectancy, profit factor, maximum drawdown, consecutive wins/losses, frequency per week/month) and breakdowns by strategy, session, and timeframe.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Performance Analytics Engine Automatically calculate: Win Rate, Average Win, Average Loss, Expectancy, Profit Factor, Maximum Drawdown, Consecutive Wins/Losses, Strategy-specific performance, Session-based performance, Timeframe-based performance, Trade frequency per week/month"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Analytics functions produce the requested global metrics from the stored trade set.",
-        "Analytics functions produce requested breakdown tables/series by strategy, session, and timeframe.",
-        "Maximum drawdown is computed from the equity curve based on trade sequencing.",
-        "Consecutive wins/losses and trade frequency per week/month are computed correctly."
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "text": "Implement the Discipline & Rule Tracking System: require a pre-save checklist (structure break confirmed, liquidity sweep confirmed, risk respected, no emotional entry), track rule violations/emotional trading/overtrading, compute a Discipline Score (%), and highlight out-of-rule trades.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Discipline & Rule Tracking System",
-          "Before saving trade, include checklist: Structure break confirmed? Liquidity sweep confirmed? Risk respected? No emotional entry?",
-          "Track: Rule violations, Emotional trading, Overtrading",
-          "Display Discipline Score (%). Highlight trades taken outside strategy rules."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Trade entry requires completing the checklist before saving.",
-        "Rule-violation and discipline-related fields are stored with each trade and persist via backend.",
-        "A Discipline Score (%) is displayed and updates as trades change.",
-        "Out-of-rule trades are visually highlighted in journal and relevant dashboard views."
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "text": "Add Professional Risk & Position Tools as dedicated pages/panels: lot size calculator, risk % calculator, fixed amount risk tool, pip calculator, compounding growth simulator, drawdown recovery calculator, and risk of ruin calculator; all tools must use accurate math and be usable without saving a trade.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Professional Risk & Position Tools Include: Lot Size Calculator, Risk % Calculator, Fixed Amount Risk Tool, Pip Calculator, Compounding Growth Simulator, Drawdown Recovery Calculator, Risk of Ruin Calculator",
-          "All formulas must be mathematically accurate for forex trading."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Each requested tool is accessible from the UI and provides inputs + outputs.",
-        "Lot size tool uses the specified lot size formula and clearly shows computed results.",
-        "Tools work independently of journal (no trade creation required)."
-      ]
-    },
-    {
-      "id": "REQ-12",
-      "text": "Implement Settings UI and persistence for: default account size, default risk %, base currency, theme toggle, and strategy presets; defaults should prefill journal/tool inputs where appropriate.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Settings: Default account size, Default risk %, Base currency, Theme toggle, Strategy presets"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Settings page allows editing all requested settings and persists them per user in backend.",
-        "Journal entry form and risk tools prefill from saved defaults where applicable.",
-        "Theme toggle switches between supported themes without breaking readability/contrast."
-      ]
-    },
-    {
-      "id": "REQ-13",
-      "text": "Create a simple rule-based chatbot panel (no external AI) that answers basic questions by reading the user’s current stored stats/analytics (e.g., “What is my win rate right now?”, “How many trades this month?”) and provides deterministic responses.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "yes then dont use AI powered just make a simple Chatbot without AI"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Chat panel is available in the app and supports a basic chat-like interaction.",
-        "Bot answers at least a small set of key stat queries using computed analytics from stored trades (not hardcoded numbers).",
-        "No external AI/LLM API calls are used."
-      ]
-    },
-    {
-      "id": "REQ-14",
-      "text": "Provide a CSV export for trades that respects current filters (when applicable) and exports all relevant trade fields and key derived metrics in a consistent column order.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Export CSV"
-        ]
-      },
-      "acceptanceCriteria": [
-        "User can export trades to CSV from the journal UI.",
-        "Export includes core fields and computed metrics (e.g., P/L, RR, risk amount, balance after).",
-        "If filters/search are applied, export can export the currently filtered set (or provide a clear option to export all)."
+        "If the saved strategy preset list is empty, the New Trade form does not offer any Strategy options and indicates the user should add strategies in Settings (user-facing text must be in English).",
+        "Users cannot create/add a new strategy from the Journal form; strategies remain managed only via Settings."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor (all logic in backend/main.mo).",
-    "Do not edit files in frontend/src/components/ui or other immutablePaths; compose those components instead.",
-    "Authentication must use Internet Identity (no email/password/OTP).",
-    "Do not use external AI/LLM services or third-party authentication providers.",
-    "Store generated/derived logo assets as static files under frontend/public/assets/generated (not served from backend)."
+    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui; compose existing UI components instead.",
+    "Keep the backend single-actor architecture (all Motoko logic in backend/main.mo); only introduce migration code if a state schema change is required."
   ],
   "nonGoals": [
-    "Implementing real AI/LLM-powered insights or bias detection beyond a deterministic rule-based chatbot.",
-    "Implementing email/password authentication, OTP, or email/SMS delivery.",
-    "Integrating external databases or third-party analytics services."
+    "Adding the ability to create or edit strategy presets from the Journal page.",
+    "Introducing additional strategy metadata (colors, performance rules, tags) beyond the existing preset names.",
+    "Changing the backend Settings schema (it already includes strategyPresets as Text)."
   ],
   "imageRequirements": {
     "required": [],
-    "edits": [
-      "Create transparent PNG + favicon/icon variants (Logo 5.jpg > nurox-logo-transparent.dim_1024x1024.png)",
-      "Create favicon from logo (Logo 5.jpg > nurox-favicon.dim_64x64.png)",
-      "Create square app icon from logo (Logo 5.jpg > nurox-app-icon.dim_512x512.png)"
-    ]
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
+    "edits": []
   }
 }

@@ -1,520 +1,91 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Nurox — Frontend Trading Journal & Analytics Command Center",
+  "title": "Wire Settings Strategy Presets into Journal New Trade Strategy dropdown",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Implement Internet Identity authentication with gated routing, post-login redirect to dashboard, and sign-out.",
+      "id": "REQ-15",
+      "summary": "Source New Trade Strategy dropdown options exclusively from the authenticated user’s saved Settings strategy presets and preserve legacy strategy values when editing.",
       "acceptanceCriteria": [
-        "Unauthenticated visitors are prompted to sign in with Internet Identity before accessing the app.",
-        "After successful login, the user is redirected into the Nurox dashboard.",
-        "A visible sign-out control is available and returns the user to the signed-out state."
+        "After saving Settings with strategy presets (e.g., lines: \"Order Block\"), opening Journal → New Trade shows \"Order Block\" as a selectable Strategy option.",
+        "The Strategy dropdown in the New Trade form does not display any hardcoded strategies (e.g., no default list like “Structure Break”, “Other”, etc.) when presets exist; it only displays the saved presets.",
+        "Editing an existing trade still shows the trade’s saved strategy value selected in the Strategy field, even if it is not currently present in presets (no crash)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/journal/TradeFormDialog.tsx",
           "operation": "modify",
-          "description": "Add authenticated app shell with gated routing: show signed-out/login experience when unauthenticated, and redirect authenticated users to the main dashboard route. Use the selected \"authorization\" component patterns to ensure users must be logged in before seeing any data; verify the component's usage instructions before implementing."
+          "description": "Replace the hardcoded Strategy <SelectItem> list with options derived from the user’s saved settings.strategyPresets (via existing useGetSettings hook). Ensure editing mode keeps the trade’s saved strategy selectable/selected even if it is not in current presets (e.g., by injecting the existing value into the rendered options list). Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/auth/AuthGate.tsx",
-          "operation": "create",
-          "description": "Create an auth gate wrapper that blocks protected content until Internet Identity is available, handles initializing/loading states, and coordinates redirect behavior. Use the selected \"authorization\" component guidance for login/logout caching and query clearing; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/auth/LoginView.tsx",
-          "operation": "create",
-          "description": "Create a login screen that prompts Internet Identity sign-in and includes Nurox branding. Use the selected \"authorization\" component login approach (Internet Identity + logout clearing cached data); verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/auth/UserProfileSetupModal.tsx",
-          "operation": "create",
-          "description": "Create a first-login profile setup modal to ask for a display name when no profile exists, and persist via backend calls. Use the selected \"authorization\" component user profile setup guidance and avoid modal flash; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/shell/TopBar.tsx",
-          "operation": "create",
-          "description": "Add a top bar that shows the current user display name (from user profile) and includes a sign-out control that clears cached app data. Use the selected \"authorization\" component recommendations for logout (clear identity + clear react-query cache); verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useCurrentUserProfile.ts",
-          "operation": "create",
-          "description": "Create a react-query hook to fetch and cache the current user's profile and expose loading states suitable for preventing profile setup modal flash. Use the selected \"authorization\" component guidance for getCallerUserProfile usage; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/main.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Ensure the app-level query client is accessible for auth flows (e.g., logout clears cached queries) and keep InternetIdentityProvider wrapping the app for consistent gated routing behavior."
+          "description": "Ensure Settings query/mutation wiring supports immediate UI refresh after Save Settings (e.g., continue invalidating the ['settings'] query on save success and keep cache behavior compatible with the Journal form reading settings)."
         }
       ]
     },
     {
-      "id": "REQ-3",
-      "summary": "Define a modular frontend architecture separating UI, domain types, backend calls, and analytics/calculation utilities.",
+      "id": "REQ-16",
+      "summary": "Parse newline-delimited Settings.strategyPresets into a clean, de-duplicated list for the Strategy dropdown.",
       "acceptanceCriteria": [
-        "Frontend has a domain/types layer for trade and settings objects.",
-        "Calculation and analytics logic is implemented in standalone utility modules.",
-        "React components call utilities/services rather than implementing math inline."
+        "Given a strategy presets textarea value containing blank lines and extra spaces, the New Trade Strategy dropdown shows only non-empty trimmed items.",
+        "Duplicate presets do not render duplicate Strategy options in the dropdown."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/strategyPresets.ts",
+          "operation": "create",
+          "description": "Add a reusable parser utility to convert a newline-delimited strategyPresets string into a clean list: trim each line, drop empty lines, and de-duplicate entries using a single consistent approach across the app (choose and document case-sensitive vs case-insensitive behavior inside the utility)."
+        },
+        {
+          "path": "frontend/src/components/journal/TradeFormDialog.tsx",
+          "operation": "modify",
+          "description": "Use the shared strategy presets parsing utility to build the Strategy dropdown options from settings.strategyPresets, ensuring whitespace/blank lines are handled and duplicates are not rendered. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "summary": "Update frontend typing so TradeFormData.strategy supports dynamic preset strings instead of a fixed union.",
+      "acceptanceCriteria": [
+        "The frontend builds without TypeScript errors after making Strategy presets dynamic.",
+        "Saving a trade with a preset strategy stores the selected strategy value into the trade’s entryType field (via existing mapping) and it appears in the Journal table/search as before."
       ],
       "file_operations": [
         {
           "path": "frontend/src/domain/types.ts",
-          "operation": "create",
-          "description": "Define domain-layer types for journal inputs, UI trade model, settings model, and normalized enums (direction/session/timeframe/strategy) distinct from UI components."
-        },
-        {
-          "path": "frontend/src/domain/mappers.ts",
-          "operation": "create",
-          "description": "Add mapping functions between backend TradeView/Trade and the UI trade model, including derived-metric fields and discipline/rule tracking fields."
-        },
-        {
-          "path": "frontend/src/services/actorClient.ts",
-          "operation": "create",
-          "description": "Create a thin service layer that wraps useActor-backed calls for trades, settings, profile, and screenshot operations (no UI logic), returning domain-friendly types."
-        },
-        {
-          "path": "frontend/src/hooks/useTrades.ts",
-          "operation": "create",
-          "description": "Create react-query hooks for loading, saving, and deleting trades that depend on the authenticated actor, returning domain-model trades."
-        },
-        {
-          "path": "frontend/src/hooks/useSettings.ts",
-          "operation": "create",
-          "description": "Create react-query hooks for loading and saving settings, exposing defaults to prefill journal and tools."
-        },
-        {
-          "path": "frontend/src/utils/format.ts",
-          "operation": "create",
-          "description": "Add shared formatting utilities (currency, percent, date/time) used across dashboard, journal, tools, and CSV export."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Apply a premium, high-contrast black-and-gold terminal-style theme with coherent typography and responsive layout.",
-      "acceptanceCriteria": [
-        "App uses a consistent black/gold premium theme with high contrast and minimal visual noise.",
-        "Primary layouts are optimized for desktop and remain usable on tablets.",
-        "Typography, spacing, and component variants look coherent across all pages."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Implement global black-and-gold terminal theme via CSS variables (background/foreground/primary/accent/chart palette), typography defaults, and consistent spacing tokens; avoid editing immutable component library files and style via composition."
+          "description": "Adjust domain typing to support dynamic strategy values (e.g., remove the fixed Strategy string union and allow TradeFormData.strategy to be a string compatible with preset-driven values)."
         },
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/components/journal/TradeFormDialog.tsx",
           "operation": "modify",
-          "description": "Extend Tailwind theme tokens for Nurox brand colors (gold accents), chart colors, shadows, and radii to support a premium terminal aesthetic across all pages."
-        },
-        {
-          "path": "frontend/src/components/shell/AppLayout.tsx",
-          "operation": "create",
-          "description": "Create a responsive desktop-first layout with top bar + optional left navigation rail, consistent paddings, and content container styling. Compose UI using existing shadcn/ui components (without editing frontend/src/components/ui). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/shell/SideNav.tsx",
-          "operation": "create",
-          "description": "Create a navigation component for Dashboard, Journal, Tools, Settings, and Chat panel access, matching the black/gold terminal styling. Compose using existing shadcn/ui primitives; verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Add Nurox logo to the app shell and include favicon/app icon assets as static frontend assets.",
-      "acceptanceCriteria": [
-        "Logo is displayed in the app header and/or login screen with appropriate sizing for desktop/tablet.",
-        "A favicon is present and derived from the uploaded logo.",
-        "Logo assets are served from frontend static assets (not via backend)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/public/assets/generated/nurox-logo-transparent.dim_1024x1024.png",
-          "operation": "create",
-          "description": "Add generated transparent PNG logo asset for use in login and app header (static asset)."
-        },
-        {
-          "path": "frontend/public/assets/generated/nurox-favicon.dim_64x64.png",
-          "operation": "create",
-          "description": "Add generated favicon image derived from the logo (static asset)."
-        },
-        {
-          "path": "frontend/public/assets/generated/nurox-app-icon.dim_512x512.png",
-          "operation": "create",
-          "description": "Add generated square app icon derived from the logo (static asset)."
-        },
-        {
-          "path": "frontend/index.html",
-          "operation": "modify",
-          "description": "Wire the favicon into the document head using the generated asset at frontend/public/assets/generated/nurox-favicon.dim_64x64.png."
-        },
-        {
-          "path": "frontend/src/components/shell/TopBar.tsx",
-          "operation": "modify",
-          "description": "Render the Nurox logo in the top bar using frontend/public/assets/generated/nurox-logo-transparent.dim_1024x1024.png, sized for desktop and tablet."
-        },
-        {
-          "path": "frontend/src/components/auth/LoginView.tsx",
-          "operation": "modify",
-          "description": "Render the Nurox logo in the login screen using frontend/public/assets/generated/nurox-logo-transparent.dim_1024x1024.png and align it with the premium terminal theme."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "Implement the Advanced Trading Journal UI: trade entry with screenshot upload, edit/delete, and list with sort/filter/search/tags and rule-violation highlighting.",
-      "acceptanceCriteria": [
-        "Trade create form includes all required fields and validates required inputs.",
-        "Trades can be edited and deleted and changes persist via the backend.",
-        "Journal list supports sorting, filtering, and free-text search.",
-        "Trades can be tagged and tags are persisted.",
-        "Trades with rule violations are visually highlighted in the list and in trade details.",
-        "Screenshot upload is supported with a documented size limit and persists per trade."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/JournalPage.tsx",
-          "operation": "create",
-          "description": "Create the main journal page containing trade list, filter/search controls, CSV export entry point, and create/edit flows, with violation highlighting and tag display. Compose with shadcn/ui components without modifying frontend/src/components/ui; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/journal/TradeForm.tsx",
-          "operation": "create",
-          "description": "Create the trade entry/edit form capturing required inputs (date, pair, direction, prices, lot size, risk %, balance before, strategy, timeframe, session, emotions before/after, notes) and integrating the pre-save checklist (discipline). Ensure validation and no inline analytics math. Compose with shadcn/ui; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/journal/ScreenshotUploader.tsx",
-          "operation": "create",
-          "description": "Implement screenshot upload UI with a documented size limit, preview, and upload progress. Use the selected \"blob-storage\" component via ExternalBlob to upload and then store a persistent reference/URL with the trade; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/journal/TradesTable.tsx",
-          "operation": "create",
-          "description": "Create a sortable/filterable/searchable trades list UI with tag chips and visual highlighting for out-of-rule trades. Compose with shadcn/ui table/badge/popover components; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/journal/TradeDetailsDrawer.tsx",
-          "operation": "create",
-          "description": "Create a trade details view (drawer/panel) showing full trade fields, derived metrics, violations, screenshot preview, and edit/delete actions. Compose with shadcn/ui; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/utils/journalFilters.ts",
-          "operation": "create",
-          "description": "Add pure functions to apply search, tag filters, date filters, rule-violation filters, and sorting to a trade list, used by the Journal UI and CSV export."
-        },
-        {
-          "path": "frontend/src/services/actorClient.ts",
-          "operation": "modify",
-          "description": "Add trade CRUD wrappers (get all, get by id, save, delete) and screenshot save wrapper using ExternalBlob. Use the selected \"blob-storage\" component for image handling; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Register navigation to the Journal page within the authenticated app layout and ensure it is protected behind the auth gate."
-        }
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "summary": "Implement accurate forex/trading calculation utilities and ensure derived values are computed on save (pure, unit-testable).",
-      "acceptanceCriteria": [
-        "Lot size computation uses exactly: Lot Size = Risk Amount / (Stop Distance × Pip Value).",
-        "Trade save flow computes and stores derived values (at minimum: Risk Amount, RR, P/L, Balance After, % Gain/Loss).",
-        "Utilities are unit-testable (pure functions) and not coupled to UI components."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/tradingCalculations.ts",
-          "operation": "create",
-          "description": "Add pure calculation utilities for risk amount, stop distance, pip value usage, RR ratio, profit/loss, balance after, and % gain/loss. Ensure lot size follows exactly: Lot Size = Risk Amount / (Stop Distance × Pip Value)."
-        },
-        {
-          "path": "frontend/src/utils/validation.ts",
-          "operation": "create",
-          "description": "Add pure validation utilities for required trade inputs and numeric ranges used by TradeForm and tools."
+          "description": "Update form state initialization and Select onValueChange typing to align with the new dynamic strategy type, while keeping existing save flow and mapping behavior intact. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/domain/mappers.ts",
           "operation": "modify",
-          "description": "Ensure mapping into backend Trade payload includes computed derived fields (at minimum: risk amount, RR, P/L, balance after, % gain/loss) before calling save."
-        },
-        {
-          "path": "frontend/src/components/journal/TradeForm.tsx",
-          "operation": "modify",
-          "description": "Refactor TradeForm to call tradingCalculations utilities for derived fields rather than performing inline math in components."
-        },
-        {
-          "path": "frontend/src/utils/tradingCalculations.test.ts",
-          "operation": "create",
-          "description": "Add unit tests for the pure calculation utilities, including the exact lot size formula and edge cases (zero/negative distances, missing pip value, etc.)."
+          "description": "Confirm the form-to-backend mapping continues to store the chosen strategy string into the Trade.entryType field without relying on hardcoded strategy enums/unions."
         }
       ]
     },
     {
-      "id": "REQ-8",
-      "summary": "Build the main dashboard (command center) with KPI tiles and charts derived from stored trades.",
+      "id": "REQ-18",
+      "summary": "Handle empty strategy presets by disabling Strategy selection in New Trade and guiding the user to add presets in Settings.",
       "acceptanceCriteria": [
-        "Dashboard shows all requested KPIs computed from the user’s stored trades.",
-        "Equity curve chart renders from an equity/balance series derived from trades.",
-        "Monthly performance bar chart groups results by month.",
-        "Pair distribution pie chart groups by trading pair.",
-        "Session performance chart groups by session (Asia/London/New York)."
+        "If the saved strategy preset list is empty, the New Trade form does not offer any Strategy options and indicates the user should add strategies in Settings (user-facing text must be in English).",
+        "Users cannot create/add a new strategy from the Journal form; strategies remain managed only via Settings."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/DashboardPage.tsx",
-          "operation": "create",
-          "description": "Create the dashboard page that loads stored trades, renders KPI tiles, and shows the requested chart panels using analytics utilities (no inline computations). Compose with shadcn/ui cards/tabs; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/dashboard/KpiGrid.tsx",
-          "operation": "create",
-          "description": "Create KPI tile grid for Total Trades, Win/Loss Rates, Net P/L, Profit Factor, Expectancy, Avg RR, Max Drawdown, streaks, best/worst trade, Risk Consistency Score, Discipline Score. Compose with shadcn/ui; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/charts/EquityCurveChart.tsx",
-          "operation": "create",
-          "description": "Create an equity curve line chart component that accepts a computed equity series from analytics utilities and renders it with the black/gold theme."
-        },
-        {
-          "path": "frontend/src/components/charts/MonthlyPerformanceChart.tsx",
-          "operation": "create",
-          "description": "Create a monthly performance bar chart component that accepts computed month-grouped performance series from analytics utilities."
-        },
-        {
-          "path": "frontend/src/components/charts/PairDistributionChart.tsx",
-          "operation": "create",
-          "description": "Create a pair distribution pie chart component that accepts computed pair-grouped aggregates from analytics utilities."
-        },
-        {
-          "path": "frontend/src/components/charts/SessionPerformanceChart.tsx",
-          "operation": "create",
-          "description": "Create a session performance chart component (Asia/London/New York) that accepts computed session-grouped aggregates from analytics utilities."
-        },
-        {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/journal/TradeFormDialog.tsx",
           "operation": "modify",
-          "description": "Register the Dashboard route as the main post-login landing page and ensure navigation highlights the active section."
-        }
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "summary": "Implement a performance analytics engine to compute global stats, breakdowns, drawdown, streaks, and frequency metrics from trades.",
-      "acceptanceCriteria": [
-        "Analytics functions produce the requested global metrics from the stored trade set.",
-        "Analytics functions produce requested breakdown tables/series by strategy, session, and timeframe.",
-        "Maximum drawdown is computed from the equity curve based on trade sequencing.",
-        "Consecutive wins/losses and trade frequency per week/month are computed correctly."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/analytics.ts",
-          "operation": "create",
-          "description": "Add pure analytics utilities to compute win rate, avg win/loss, expectancy, profit factor, max drawdown (from equity curve), streaks, best/worst trade, and trade frequency per week/month."
+          "description": "Implement an empty-presets state: when parsed presets list is empty, disable the Strategy Select (no options rendered), show English helper text instructing the user to add strategy presets in Settings, and prevent arbitrary strategy entry from the Journal form. Verify the component's usage instructions before implementing."
         },
-        {
-          "path": "frontend/src/utils/breakdowns.ts",
-          "operation": "create",
-          "description": "Add pure breakdown utilities to group and aggregate performance by strategy, session, timeframe, and pair for dashboard charts and tables."
-        },
-        {
-          "path": "frontend/src/utils/analytics.test.ts",
-          "operation": "create",
-          "description": "Add unit tests for analytics and breakdown utilities, including drawdown computation from an ordered equity series and streak calculations."
-        },
-        {
-          "path": "frontend/src/pages/DashboardPage.tsx",
-          "operation": "modify",
-          "description": "Update dashboard to use analytics/breakdowns utilities for all KPIs and chart series derivations (no inline computations)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "summary": "Add discipline & rule tracking: pre-save checklist, rule violation tracking, Discipline Score, and out-of-rule highlighting.",
-      "acceptanceCriteria": [
-        "Trade entry requires completing the checklist before saving.",
-        "Rule-violation and discipline-related fields are stored with each trade and persist via backend.",
-        "A Discipline Score (%) is displayed and updates as trades change.",
-        "Out-of-rule trades are visually highlighted in journal and relevant dashboard views."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/discipline.ts",
-          "operation": "create",
-          "description": "Add pure utilities to compute rule violations, overtrading/emotional flags, and a Discipline Score (%) from checklist + trade context."
-        },
-        {
-          "path": "frontend/src/components/journal/PreSaveChecklist.tsx",
-          "operation": "create",
-          "description": "Create a checklist UI (structure break confirmed, liquidity sweep confirmed, risk respected, no emotional entry) that must be completed before enabling save. Compose with shadcn/ui; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/journal/TradeForm.tsx",
-          "operation": "modify",
-          "description": "Integrate PreSaveChecklist into the save flow, compute discipline score and violations using utilities, and ensure out-of-rule trades are flagged for highlighting."
-        },
-        {
-          "path": "frontend/src/components/journal/TradesTable.tsx",
-          "operation": "modify",
-          "description": "Add visual highlighting for out-of-rule trades and surface discipline score/violation indicators in the list."
-        },
-        {
-          "path": "frontend/src/components/dashboard/KpiGrid.tsx",
-          "operation": "modify",
-          "description": "Display Discipline Score (%) and any discipline-related KPIs derived from analytics utilities, updating as trades change."
-        }
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "summary": "Add dedicated risk & position tools (no trade save required) with accurate math: lot size, risk %, fixed risk, pip calc, compounding, drawdown recovery, risk of ruin.",
-      "acceptanceCriteria": [
-        "Each requested tool is accessible from the UI and provides inputs + outputs.",
-        "Lot size tool uses the specified lot size formula and clearly shows computed results.",
-        "Tools work independently of journal (no trade creation required)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/ToolsPage.tsx",
-          "operation": "create",
-          "description": "Create a tools page that hosts all requested calculators/simulators as panels (tabs/accordion) and is accessible via navigation. Compose with shadcn/ui; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/tools/LotSizeCalculator.tsx",
-          "operation": "create",
-          "description": "Create lot size calculator UI that uses tradingCalculations utilities and explicitly follows the required formula. Compose with shadcn/ui; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/tools/RiskPercentCalculator.tsx",
-          "operation": "create",
-          "description": "Create a risk % calculator tool (inputs: account size, risk amount; output: risk %) using pure utility functions."
-        },
-        {
-          "path": "frontend/src/components/tools/FixedAmountRiskTool.tsx",
-          "operation": "create",
-          "description": "Create a fixed risk amount tool to compute position sizing inputs/outputs using pure utility functions."
-        },
-        {
-          "path": "frontend/src/components/tools/PipCalculator.tsx",
-          "operation": "create",
-          "description": "Create a pip/position calculator tool for pip distance/value computations using pure utility functions."
-        },
-        {
-          "path": "frontend/src/components/tools/CompoundingGrowthSimulator.tsx",
-          "operation": "create",
-          "description": "Create a compounding growth simulator tool (e.g., periodic returns) using pure utility functions."
-        },
-        {
-          "path": "frontend/src/components/tools/DrawdownRecoveryCalculator.tsx",
-          "operation": "create",
-          "description": "Create a drawdown recovery calculator tool (required return to recover) using pure utility functions."
-        },
-        {
-          "path": "frontend/src/components/tools/RiskOfRuinCalculator.tsx",
-          "operation": "create",
-          "description": "Create a risk of ruin calculator tool using deterministic math utilities (no external services)."
-        },
-        {
-          "path": "frontend/src/utils/toolsMath.ts",
-          "operation": "create",
-          "description": "Add pure, reusable math utilities used by the tools page (risk %, compounding, drawdown recovery, risk of ruin), keeping calculations out of React components."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Register the Tools route and wire it into navigation within the authenticated layout."
-        }
-      ]
-    },
-    {
-      "id": "REQ-12",
-      "summary": "Implement Settings UI with persistence and defaults that prefill journal/tool inputs; add theme toggle support.",
-      "acceptanceCriteria": [
-        "Settings page allows editing all requested settings and persists them per user in backend.",
-        "Journal entry form and risk tools prefill from saved defaults where applicable.",
-        "Theme toggle switches between supported themes without breaking readability/contrast."
-      ],
-      "file_operations": [
         {
           "path": "frontend/src/pages/SettingsPage.tsx",
-          "operation": "create",
-          "description": "Create a settings page for default account size, default risk %, base currency, theme toggle, and strategy presets, persisting via settings hooks. Compose with shadcn/ui form components; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useSettings.ts",
           "operation": "modify",
-          "description": "Ensure settings hook supports initial defaults, saving, and cache invalidation so changes reflect across dashboard/journal/tools."
-        },
-        {
-          "path": "frontend/src/utils/theme.ts",
-          "operation": "create",
-          "description": "Add a theme utility to apply the theme toggle (e.g., toggling the root 'dark' class and setting CSS variables) while maintaining the required high-contrast black/gold styling."
-        },
-        {
-          "path": "frontend/src/components/journal/TradeForm.tsx",
-          "operation": "modify",
-          "description": "Prefill trade entry fields (account size, risk %, base currency, strategy presets where applicable) from saved settings via hooks."
-        },
-        {
-          "path": "frontend/src/pages/ToolsPage.tsx",
-          "operation": "modify",
-          "description": "Prefill tool inputs (account size, default risk %) from saved settings via hooks."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Register the Settings route and wire it into the authenticated navigation."
-        }
-      ]
-    },
-    {
-      "id": "REQ-13",
-      "summary": "Add a deterministic, rule-based chatbot panel that answers questions using current computed stats (no external AI).",
-      "acceptanceCriteria": [
-        "Chat panel is available in the app and supports a basic chat-like interaction.",
-        "Bot answers at least a small set of key stat queries using computed analytics from stored trades (not hardcoded numbers).",
-        "No external AI/LLM API calls are used."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/chat/ChatPanel.tsx",
-          "operation": "create",
-          "description": "Create a chat-like panel UI that accepts user questions, appends conversation messages, and renders deterministic responses. Compose with shadcn/ui; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/utils/chatbotRules.ts",
-          "operation": "create",
-          "description": "Implement deterministic parsing/rules for a small set of questions (e.g., win rate, trades this month, net P/L, best/worst trade), answering using analytics utility outputs (no external calls)."
-        },
-        {
-          "path": "frontend/src/pages/DashboardPage.tsx",
-          "operation": "modify",
-          "description": "Wire the ChatPanel into the dashboard as a docked panel or tab, providing it the computed analytics context derived from the user’s trades."
-        }
-      ]
-    },
-    {
-      "id": "REQ-14",
-      "summary": "Provide CSV export for trades respecting current filters/search, exporting core fields and derived metrics with consistent column order.",
-      "acceptanceCriteria": [
-        "User can export trades to CSV from the journal UI.",
-        "Export includes core fields and computed metrics (e.g., P/L, RR, risk amount, balance after).",
-        "If filters/search are applied, export can export the currently filtered set (or provide a clear option to export all)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/csvExport.ts",
-          "operation": "create",
-          "description": "Add pure utilities to generate CSV text with stable column ordering and proper escaping, including relevant trade fields and key derived metrics."
-        },
-        {
-          "path": "frontend/src/pages/JournalPage.tsx",
-          "operation": "modify",
-          "description": "Add an export control that generates CSV for the currently filtered/sorted trade set (or provides a clear toggle to export all), using journalFilters and csvExport utilities."
+          "description": "Remove any hardcoded default strategyPresets initial value from Settings form state so users explicitly manage strategies via Settings; keep the textarea placeholder for guidance and rely on persisted saved settings for actual presets. Verify the component's usage instructions before implementing."
         }
       ]
     }

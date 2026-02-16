@@ -1,400 +1,79 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-16T07:52:49.466Z",
+  "generatedAt": "2026-02-16T08:47:27.230Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 14,
-    "implemented": 13,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
-        "id": "REQ-1",
-        "summary": "Implement Internet Identity authentication and gated routing so users must sign in before accessing Nurox; after successful sign-in, redirect the user to the main dashboard.",
+        "id": "REQ-15",
+        "summary": "Update the Journal New Trade form so the Strategy dropdown options are sourced exclusively from the authenticated user’s saved Settings → Strategy Presets (persisted after the user clicks Save Settings), instead of a hardcoded list.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/auth/AuthGate.tsx",
-          "frontend/src/components/auth/LoginView.tsx",
-          "frontend/src/components/auth/UserProfileSetupModal.tsx",
-          "frontend/src/components/shell/TopBar.tsx",
-          "frontend/src/hooks/useCurrentUserProfile.ts",
-          "frontend/src/main.tsx"
+          "frontend/src/components/journal/TradeFormDialog.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/components/auth/LoginView.tsx",
-          "frontend/src/components/auth/UserProfileSetupModal.tsx",
-          "frontend/src/components/shell/TopBar.tsx",
-          "frontend/src/main.tsx"
+          "frontend/src/components/journal/TradeFormDialog.tsx"
         ]
       },
       {
-        "id": "REQ-10",
-        "summary": "Implement the Discipline & Rule Tracking System: require a pre-save checklist (structure break confirmed, liquidity sweep confirmed, risk respected, no emotional entry), track rule violations/emotional trading/overtrading, compute a Discipline Score (%), and highlight out-of-rule trades.",
+        "id": "REQ-16",
+        "summary": "Parse Settings.strategyPresets (stored as a newline-delimited string) into a clean list for the Strategy dropdown by trimming whitespace, removing empty lines, and de-duplicating identical entries (case-sensitive or case-insensitive must be consistent within the app).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/discipline.ts",
-          "frontend/src/components/journal/PreSaveChecklist.tsx",
-          "frontend/src/components/journal/TradeForm.tsx",
-          "frontend/src/components/journal/TradesTable.tsx",
-          "frontend/src/components/dashboard/KpiGrid.tsx"
+          "frontend/src/utils/strategyPresets.ts",
+          "frontend/src/components/journal/TradeFormDialog.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/journal/TradesTable.tsx",
-          "frontend/src/components/dashboard/KpiGrid.tsx"
+          "frontend/src/utils/strategyPresets.ts",
+          "frontend/src/components/journal/TradeFormDialog.tsx"
         ]
       },
       {
-        "id": "REQ-11",
-        "summary": "Add Professional Risk & Position Tools as dedicated pages/panels: lot size calculator, risk % calculator, fixed amount risk tool, pip calculator, compounding growth simulator, drawdown recovery calculator, and risk of ruin calculator; all tools must use accurate math and be usable without saving a trade.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/ToolsPage.tsx",
-          "frontend/src/components/tools/LotSizeCalculator.tsx",
-          "frontend/src/components/tools/RiskPercentCalculator.tsx",
-          "frontend/src/components/tools/FixedAmountRiskTool.tsx",
-          "frontend/src/components/tools/PipCalculator.tsx",
-          "frontend/src/components/tools/CompoundingGrowthSimulator.tsx",
-          "frontend/src/components/tools/DrawdownRecoveryCalculator.tsx",
-          "frontend/src/components/tools/RiskOfRuinCalculator.tsx",
-          "frontend/src/utils/toolsMath.ts",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/ToolsPage.tsx",
-          "frontend/src/components/tools/LotSizeCalculator.tsx",
-          "frontend/src/components/tools/RiskPercentCalculator.tsx",
-          "frontend/src/components/tools/PipCalculator.tsx",
-          "frontend/src/components/tools/CompoundingGrowthSimulator.tsx",
-          "frontend/src/components/tools/DrawdownRecoveryCalculator.tsx",
-          "frontend/src/components/tools/RiskOfRuinCalculator.tsx",
-          "frontend/src/utils/toolsMath.ts",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-12",
-        "summary": "Implement Settings UI and persistence for: default account size, default risk %, base currency, theme toggle, and strategy presets; defaults should prefill journal/tool inputs where appropriate.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/SettingsPage.tsx",
-          "frontend/src/hooks/useSettings.ts",
-          "frontend/src/utils/theme.ts",
-          "frontend/src/components/journal/TradeForm.tsx",
-          "frontend/src/pages/ToolsPage.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/SettingsPage.tsx",
-          "frontend/src/pages/ToolsPage.tsx",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-13",
-        "summary": "Create a simple rule-based chatbot panel (no external AI) that answers basic questions by reading the user’s current stored stats/analytics (e.g., “What is my win rate right now?”, “How many trades this month?”) and provides deterministic responses.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/chat/ChatPanel.tsx",
-          "frontend/src/utils/chatbotRules.ts",
-          "frontend/src/pages/DashboardPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/chat/ChatPanel.tsx",
-          "frontend/src/utils/chatbotRules.ts",
-          "frontend/src/pages/DashboardPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-14",
-        "summary": "Provide a CSV export for trades that respects current filters (when applicable) and exports all relevant trade fields and key derived metrics in a consistent column order.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/utils/csvExport.ts",
-          "frontend/src/pages/JournalPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/utils/csvExport.ts",
-          "frontend/src/pages/JournalPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Create a Motoko backend data model and API for user-specific persistence (keyed by caller principal) to store trades, settings, and any derived metadata needed by the UI; expose CRUD methods for trades and read/update methods for settings.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Define a clean, modular frontend architecture with clear separation between UI components, domain types, API/actor calls, and calculation/analytics utilities; ensure all calculations live in dedicated utility modules and are not embedded in React components.",
+        "id": "REQ-17",
+        "summary": "Adjust frontend domain typing so TradeFormData.strategy can support dynamic preset values loaded from Settings (rather than a fixed TypeScript union of hardcoded strategy strings).",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/domain/types.ts",
-          "frontend/src/domain/mappers.ts",
-          "frontend/src/services/actorClient.ts",
-          "frontend/src/hooks/useTrades.ts",
-          "frontend/src/hooks/useSettings.ts",
-          "frontend/src/utils/format.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/domain/types.ts",
-          "frontend/src/domain/mappers.ts",
-          "frontend/src/utils/format.ts"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Apply a premium, high-contrast black-and-gold terminal-style visual theme across the application (desktop-first, tablet compatible), using a clean modern minimal layout and consistent typography, spacing, and component styling.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/components/shell/AppLayout.tsx",
-          "frontend/src/components/shell/SideNav.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/components/shell/AppLayout.tsx",
-          "frontend/src/components/shell/SideNav.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Incorporate the uploaded Nurox logo into the application shell (e.g., login header/app top bar) and provide favicon/app icon assets derived from it as static frontend assets.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/public/assets/generated/nurox-logo-transparent.dim_1024x1024.png",
-          "frontend/public/assets/generated/nurox-favicon.dim_64x64.png",
-          "frontend/public/assets/generated/nurox-app-icon.dim_512x512.png",
-          "frontend/index.html",
-          "frontend/src/components/shell/TopBar.tsx",
-          "frontend/src/components/auth/LoginView.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/public/assets/generated/nurox-logo-transparent.dim_1024x1024.png",
-          "frontend/public/assets/generated/nurox-favicon.dim_64x64.png",
-          "frontend/public/assets/generated/nurox-app-icon.dim_512x512.png",
-          "frontend/index.html",
-          "frontend/src/components/shell/TopBar.tsx",
-          "frontend/src/components/auth/LoginView.tsx"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Implement the Advanced Trading Journal: a trade entry form that captures all specified trade fields, supports screenshot upload, and supports editing/deleting trades; include sorting, filtering, search, tagging, and highlighting of rule violations.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/JournalPage.tsx",
-          "frontend/src/components/journal/TradeForm.tsx",
-          "frontend/src/components/journal/ScreenshotUploader.tsx",
-          "frontend/src/components/journal/TradesTable.tsx",
-          "frontend/src/components/journal/TradeDetailsDrawer.tsx",
-          "frontend/src/utils/journalFilters.ts",
-          "frontend/src/services/actorClient.ts",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/JournalPage.tsx",
-          "frontend/src/components/journal/TradesTable.tsx",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-7",
-        "summary": "Implement mathematically accurate forex/trading calculation utilities for trade-level metrics: risk amount, stop distance, RR ratio, profit/loss, balance after trade, and percentage gain/loss; ensure the lot size formula matches: Lot Size = Risk Amount / (Stop Distance × Pip Value).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/utils/tradingCalculations.ts",
-          "frontend/src/utils/validation.ts",
-          "frontend/src/domain/mappers.ts",
-          "frontend/src/components/journal/TradeForm.tsx",
-          "frontend/src/utils/tradingCalculations.test.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/utils/tradingCalculations.ts",
+          "frontend/src/components/journal/TradeFormDialog.tsx",
           "frontend/src/domain/mappers.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/domain/types.ts",
+          "frontend/src/components/journal/TradeFormDialog.tsx"
         ]
       },
       {
-        "id": "REQ-8",
-        "summary": "Build the Main Dashboard (Command Center) that displays all required KPIs and renders charts for equity curve, monthly performance, pair distribution, and session performance based on stored trades.",
+        "id": "REQ-18",
+        "summary": "Handle the empty-presets state in the New Trade form: if Settings has no strategy presets saved (empty list), the Strategy field must make it clear the user needs to add presets in Settings and must prevent selecting arbitrary strategies from the Journal.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/DashboardPage.tsx",
-          "frontend/src/components/dashboard/KpiGrid.tsx",
-          "frontend/src/components/charts/EquityCurveChart.tsx",
-          "frontend/src/components/charts/MonthlyPerformanceChart.tsx",
-          "frontend/src/components/charts/PairDistributionChart.tsx",
-          "frontend/src/components/charts/SessionPerformanceChart.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/journal/TradeFormDialog.tsx",
+          "frontend/src/pages/SettingsPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/DashboardPage.tsx",
-          "frontend/src/components/dashboard/KpiGrid.tsx",
-          "frontend/src/components/charts/EquityCurveChart.tsx",
-          "frontend/src/components/charts/MonthlyPerformanceChart.tsx",
-          "frontend/src/components/charts/PairDistributionChart.tsx",
-          "frontend/src/components/charts/SessionPerformanceChart.tsx",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-9",
-        "summary": "Implement the Performance Analytics Engine to compute portfolio/journal statistics (win rate, average win/loss, expectancy, profit factor, maximum drawdown, consecutive wins/losses, frequency per week/month) and breakdowns by strategy, session, and timeframe.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/utils/analytics.ts",
-          "frontend/src/utils/breakdowns.ts",
-          "frontend/src/utils/analytics.test.ts",
-          "frontend/src/pages/DashboardPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/utils/analytics.ts",
-          "frontend/src/utils/breakdowns.ts",
-          "frontend/src/pages/DashboardPage.tsx"
+          "frontend/src/components/journal/TradeFormDialog.tsx",
+          "frontend/src/pages/SettingsPage.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/authorization/MixinAuthorization.mo",
-    "backend/authorization/access-control.mo",
-    "backend/blob-storage/Mixin.mo",
-    "backend/blob-storage/Storage.mo",
-    "backend/main.mo",
     "build-request.json",
-    "build-template/Dockerfile",
-    "build-template/LICENSE",
     "build-template/README.md",
-    "build-template/deploy.sh",
-    "build-template/icp.yaml",
-    "build-template/package.json",
-    "build-template/pnpm-lock.yaml",
-    "build-template/pnpm-workspace.yaml",
-    "build-template/scripts/prune-unused-images.js",
-    "build-template/scripts/resize-images.js",
-    "build-template/src/backend/canister.yaml",
-    "build-template/src/backend/system-idl/aaaaa-aa.did",
-    "build-template/src/frontend/canister.yaml",
-    "build-template/src/frontend/components.json",
-    "build-template/src/frontend/env.json",
-    "build-template/src/frontend/eslint-rules/no-bigint-in-query-keys.js",
-    "build-template/src/frontend/eslint-rules/require-internet-identity-provider.js",
-    "build-template/src/frontend/eslint.config.js",
-    "build-template/src/frontend/package.json",
-    "build-template/src/frontend/postcss.config.js",
-    "build-template/src/frontend/src/components/ui/accordion.tsx",
-    "build-template/src/frontend/src/components/ui/alert-dialog.tsx",
-    "build-template/src/frontend/src/components/ui/alert.tsx",
-    "build-template/src/frontend/src/components/ui/aspect-ratio.tsx",
-    "build-template/src/frontend/src/components/ui/avatar.tsx",
-    "build-template/src/frontend/src/components/ui/badge.tsx",
-    "build-template/src/frontend/src/components/ui/breadcrumb.tsx",
-    "build-template/src/frontend/src/components/ui/button.tsx",
-    "build-template/src/frontend/src/components/ui/calendar.tsx",
-    "build-template/src/frontend/src/components/ui/card.tsx",
-    "build-template/src/frontend/src/components/ui/carousel.tsx",
-    "build-template/src/frontend/src/components/ui/chart.tsx",
-    "build-template/src/frontend/src/components/ui/checkbox.tsx",
-    "build-template/src/frontend/src/components/ui/collapsible.tsx",
-    "build-template/src/frontend/src/components/ui/command.tsx",
-    "build-template/src/frontend/src/components/ui/context-menu.tsx",
-    "build-template/src/frontend/src/components/ui/dialog.tsx",
-    "build-template/src/frontend/src/components/ui/drawer.tsx",
-    "build-template/src/frontend/src/components/ui/dropdown-menu.tsx",
-    "build-template/src/frontend/src/components/ui/form.tsx",
-    "build-template/src/frontend/src/components/ui/hover-card.tsx",
-    "build-template/src/frontend/src/components/ui/input-otp.tsx",
-    "build-template/src/frontend/src/components/ui/input.tsx",
-    "build-template/src/frontend/src/components/ui/label.tsx",
-    "build-template/src/frontend/src/components/ui/menubar.tsx",
-    "build-template/src/frontend/src/components/ui/navigation-menu.tsx",
-    "build-template/src/frontend/src/components/ui/pagination.tsx",
-    "build-template/src/frontend/src/components/ui/popover.tsx",
-    "build-template/src/frontend/src/components/ui/progress.tsx",
-    "build-template/src/frontend/src/components/ui/radio-group.tsx",
-    "build-template/src/frontend/src/components/ui/resizable.tsx",
-    "build-template/src/frontend/src/components/ui/scroll-area.tsx",
-    "build-template/src/frontend/src/components/ui/select.tsx",
-    "build-template/src/frontend/src/components/ui/separator.tsx",
-    "build-template/src/frontend/src/components/ui/sheet.tsx",
-    "build-template/src/frontend/src/components/ui/sidebar.tsx",
-    "build-template/src/frontend/src/components/ui/skeleton.tsx",
-    "build-template/src/frontend/src/components/ui/slider.tsx",
-    "build-template/src/frontend/src/components/ui/sonner.tsx",
-    "build-template/src/frontend/src/components/ui/switch.tsx",
-    "build-template/src/frontend/src/components/ui/table.tsx",
-    "build-template/src/frontend/src/components/ui/tabs.tsx",
-    "build-template/src/frontend/src/components/ui/textarea.tsx",
-    "build-template/src/frontend/src/components/ui/toggle-group.tsx",
-    "build-template/src/frontend/src/components/ui/toggle.tsx",
-    "build-template/src/frontend/src/components/ui/tooltip.tsx",
-    "build-template/src/frontend/src/hooks/use-mobile.tsx",
-    "build-template/src/frontend/src/lib/utils.ts",
-    "build-template/src/frontend/tsconfig.json",
-    "build-template/src/frontend/vite.config.js",
-    "build-template/tsconfig.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/index.css",
-    "frontend/index.html",
-    "frontend/public/assets/generated/nurox-app-icon.dim_512x512.png",
-    "frontend/public/assets/generated/nurox-favicon.dim_64x64.png",
-    "frontend/public/assets/generated/nurox-logo-transparent.dim_1024x1024.png",
-    "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/auth/LoginView.tsx",
-    "frontend/src/components/auth/UserProfileSetupModal.tsx",
-    "frontend/src/components/charts/EquityCurveChart.tsx",
-    "frontend/src/components/charts/MonthlyPerformanceChart.tsx",
-    "frontend/src/components/charts/PairDistributionChart.tsx",
-    "frontend/src/components/charts/SessionPerformanceChart.tsx",
-    "frontend/src/components/chat/ChatPanel.tsx",
-    "frontend/src/components/dashboard/KpiGrid.tsx",
     "frontend/src/components/journal/TradeFormDialog.tsx",
-    "frontend/src/components/journal/TradesTable.tsx",
-    "frontend/src/components/shell/AppLayout.tsx",
-    "frontend/src/components/shell/SideNav.tsx",
-    "frontend/src/components/shell/TopBar.tsx",
-    "frontend/src/components/tools/CompoundingGrowthSimulator.tsx",
-    "frontend/src/components/tools/DrawdownRecoveryCalculator.tsx",
-    "frontend/src/components/tools/LotSizeCalculator.tsx",
-    "frontend/src/components/tools/PipCalculator.tsx",
-    "frontend/src/components/tools/RiskOfRuinCalculator.tsx",
-    "frontend/src/components/tools/RiskPercentCalculator.tsx",
-    "frontend/src/config.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/domain/mappers.ts",
     "frontend/src/domain/types.ts",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/hooks/useInternetIdentity.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/src/main.tsx",
-    "frontend/src/pages/DashboardPage.tsx",
-    "frontend/src/pages/JournalPage.tsx",
     "frontend/src/pages/SettingsPage.tsx",
-    "frontend/src/pages/ToolsPage.tsx",
-    "frontend/src/ui-summary.json",
-    "frontend/src/utils/StorageClient.ts",
-    "frontend/src/utils/analytics.ts",
-    "frontend/src/utils/breakdowns.ts",
-    "frontend/src/utils/chatbotRules.ts",
-    "frontend/src/utils/csvExport.ts",
-    "frontend/src/utils/format.ts",
-    "frontend/src/utils/toolsMath.ts",
-    "frontend/src/utils/tradingCalculations.ts",
-    "frontend/src/utils/urlParams.ts",
-    "frontend/tailwind.config.js",
+    "frontend/src/utils/strategyPresets.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

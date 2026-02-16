@@ -3,7 +3,6 @@ import type { TradeView, Trade as BackendTrade, Violation } from '../backend';
 export type Direction = 'Buy' | 'Sell';
 export type Session = 'Asia' | 'London' | 'New York';
 export type Timeframe = 'M1' | 'M5' | 'M15' | 'M30' | 'H1' | 'H4' | 'D1' | 'W1';
-export type Strategy = 'Structure Break' | 'Liquidity Sweep' | 'Supply/Demand' | 'Trend Following' | 'Other';
 
 export interface UITrade extends TradeView {
   tags?: string[];
@@ -23,7 +22,7 @@ export interface TradeFormData {
   lotSize: number;
   riskPercent: number;
   accountBalance: number;
-  strategy: Strategy;
+  strategy: string;
   timeframe: Timeframe;
   session: Session;
   emotionBefore: string;
