@@ -1,0 +1,202 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Build Nurox: a premium black/gold professional trading journal + analytics web app (React+TS) with Internet Identity login, Motoko canister storage, performance dashboard, advanced trade journal with accurate forex calculations, risk tools, discipline/rule tracking, settings, and a simple rule-based chatbot.",
+  "architectural_notes": [
+    "Use Internet Identity for authentication; redirect into Nurox after successful login.",
+    "Persist trades/settings in a Motoko canister for cross-device storage (prototype storage is not LocalStorage-only).",
+    "Keep calculation logic (forex/risk/performance metrics) in dedicated utility modules separate from UI components.",
+    "Store trade data as structured objects; derive equity curve as a balance array computed from trades.",
+    "Charts implemented via Chart.js (or similar) fed from computed analytics outputs.",
+    "Simple rule-based chatbot (non-AI) reads computed stats/analytics and answers predefined query patterns."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "imageRequirements": "## Edit Images\n- Create transparent PNG + favicon/icon variants (Logo 5.jpg > nurox-logo-transparent.dim_1024x1024.png)\n- Create favicon from logo (Logo 5.jpg > nurox-favicon.dim_64x64.png)\n- Create square app icon from logo (Logo 5.jpg > nurox-app-icon.dim_512x512.png)",
+  "existing_features": [
+    {
+      "id": "feature-implement-internet-identity-authentication-and-gated-routing-so-users-must-sign-in-before-accessing-nurox-after-successful-sign-in-redirect-the-user-to-the-main-dashboard",
+      "title": "Implement Internet Identity authentication and gated routing so users must sign in before accessing Nurox; after successful sign-in, redirect the user to the main dashboard.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-define-a-clean-modular-frontend-architecture-with-clear-separation-between-ui-components-domain-types-api-actor-calls-and-calculation-analytics-utilities-ensure-all-calculations-live-in-dedicated-utility-modules-and-are-not-embedded-in-react-components",
+      "title": "Define a clean, modular frontend architecture with clear separation between UI components, domain types, API/actor calls, and calculation/analytics utilities; ensure all calculations live in dedicated utility modules and are not embedded in React components.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-premium-high-contrast-black-and-gold-terminal-style-visual-theme-across-the-application-desktop-first-tablet-compatible-using-a-clean-modern-minimal-layout-and-consistent-typography-spacing-and-component-styling",
+      "title": "Apply a premium, high-contrast black-and-gold terminal-style visual theme across the application (desktop-first, tablet compatible), using a clean modern minimal layout and consistent typography, spacing, and component styling.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-incorporate-the-uploaded-nurox-logo-into-the-application-shell-e-g-login-header-app-top-bar-and-provide-favicon-app-icon-assets-derived-from-it-as-static-frontend-assets",
+      "title": "Incorporate the uploaded Nurox logo into the application shell (e.g., login header/app top bar) and provide favicon/app icon assets derived from it as static frontend assets.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-advanced-trading-journal-a-trade-entry-form-that-captures-all-specified-trade-fields-supports-screenshot-upload-and-supports-editing-deleting-trades-include-sorting-filtering-search-tagging-and-highlighting-of-rule-violations",
+      "title": "Implement the Advanced Trading Journal: a trade entry form that captures all specified trade fields, supports screenshot upload, and supports editing/deleting trades; include sorting, filtering, search, tagging, and highlighting of rule violations.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-mathematically-accurate-forex-trading-calculation-utilities-for-trade-level-metrics-risk-amount-stop-distance-rr-ratio-profit-loss-balance-after-trade-and-percentage-gain-loss-ensure-the-lot-size-formula-matches-lot-size-risk-amount-stop-distance-pip-value",
+      "title": "Implement mathematically accurate forex/trading calculation utilities for trade-level metrics: risk amount, stop distance, RR ratio, profit/loss, balance after trade, and percentage gain/loss; ensure the lot size formula matches: Lot Size = Risk Amount / (Stop Distance × Pip Value).",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-main-dashboard-command-center-that-displays-all-required-kpis-and-renders-charts-for-equity-curve-monthly-performance-pair-distribution-and-session-performance-based-on-stored-trades",
+      "title": "Build the Main Dashboard (Command Center) that displays all required KPIs and renders charts for equity curve, monthly performance, pair distribution, and session performance based on stored trades.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-performance-analytics-engine-to-compute-portfolio-journal-statistics-win-rate-average-win-loss-expectancy-profit-factor-maximum-drawdown-consecutive-wins-losses-frequency-per-week-month-and-breakdowns-by-strategy-session-and-timeframe",
+      "title": "Implement the Performance Analytics Engine to compute portfolio/journal statistics (win rate, average win/loss, expectancy, profit factor, maximum drawdown, consecutive wins/losses, frequency per week/month) and breakdowns by strategy, session, and timeframe.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-discipline-rule-tracking-system-require-a-pre-save-checklist-structure-break-confirmed-liquidity-sweep-confirmed-risk-respected-no-emotional-entry-track-rule-violations-emotional-trading-overtrading-compute-a-discipline-score-and-highlight-out-of-rule-trades",
+      "title": "Implement the Discipline & Rule Tracking System: require a pre-save checklist (structure break confirmed, liquidity sweep confirmed, risk respected, no emotional entry), track rule violations/emotional trading/overtrading, compute a Discipline Score (%), and highlight out-of-rule trades.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-professional-risk-position-tools-as-dedicated-pages-panels-lot-size-calculator-risk-calculator-fixed-amount-risk-tool-pip-calculator-compounding-growth-simulator-drawdown-recovery-calculator-and-risk-of-ruin-calculator-all-tools-must-use-accurate-math-and-be-usable-without-saving-a-trade",
+      "title": "Add Professional Risk & Position Tools as dedicated pages/panels: lot size calculator, risk % calculator, fixed amount risk tool, pip calculator, compounding growth simulator, drawdown recovery calculator, and risk of ruin calculator; all tools must use accurate math and be usable without saving a trade.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-settings-ui-and-persistence-for-default-account-size-default-risk-base-currency-theme-toggle-and-strategy-presets-defaults-should-prefill-journal-tool-inputs-where-appropriate",
+      "title": "Implement Settings UI and persistence for: default account size, default risk %, base currency, theme toggle, and strategy presets; defaults should prefill journal/tool inputs where appropriate.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-simple-rule-based-chatbot-panel-no-external-ai-that-answers-basic-questions-by-reading-the-user-s-current-stored-stats-analytics-e-g-what-is-my-win-rate-right-now-how-many-trades-this-month-and-provides-deterministic-responses",
+      "title": "Create a simple rule-based chatbot panel (no external AI) that answers basic questions by reading the user’s current stored stats/analytics (e.g., “What is my win rate right now?”, “How many trades this month?”) and provides deterministic responses.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-a-csv-export-for-trades-that-respects-current-filters-when-applicable-and-exports-all-relevant-trade-fields-and-key-derived-metrics-in-a-consistent-column-order",
+      "title": "Provide a CSV export for trades that respects current filters (when applicable) and exports all relevant trade fields and key derived metrics in a consistent column order.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Set up Nurox project (React + TypeScript) with clean modular folder structure and separation between UI and calculation utilities",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Implement authentication using the platform’s existing login system (Internet Identity) and redirect authenticated users into the Nurox dashboard",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Implement Motoko canister backend storage for user data (trades, stats, settings) to persist/sync across devices",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Create premium black & gold, clean modern minimal UI with high-contrast, professional trading terminal feel; responsive (desktop-first, tablet compatible)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Build Main Dashboard (Command Center) with required KPIs (win rate, profit factor, expectancy, RR, drawdown, streaks, discipline/risk scores, etc.) and charts (equity curve, monthly performance, pair distribution, session performance)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Build Advanced Trading Journal: trade entry form with all specified fields (including screenshot upload + notes), auto-calculations, sorting/filtering/search, edit/delete, tags, highlight rule violations, export CSV",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Implement accurate forex calculation utilities (risk amount, RR, P/L, % gain/loss, balance after, pip/lot sizing) including Lot Size = Risk Amount / (Stop Distance × Pip Value)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Add Professional Risk & Position Tools (lot size calculator, risk % calculator, fixed amount risk tool, pip calculator, compounding growth simulator, drawdown recovery, risk of ruin)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Implement Performance Analytics Engine (strategy/session/timeframe performance, max drawdown, consecutive wins/losses, trade frequency, averages, expectancy, profit factor) derived from stored trades",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Implement Discipline & Rule Tracking (pre-save checklist, rule violations/emotional trading/overtrading tracking, Discipline Score %, highlight out-of-rule trades) + simple rule-based chatbot that answers questions from stored stats",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Add Settings (default account size, default risk %, base currency, theme toggle, strategy presets)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Create a Motoko backend data model and API for user-specific persistence (keyed by caller principal) to store trades, settings, and any derived metadata needed by the UI; expose CRUD methods for trades and read/update methods for settings.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Nurox",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

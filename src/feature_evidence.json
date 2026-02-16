@@ -1,0 +1,301 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-implement-internet-identity-authentication-and-gated-routing-so-users-must-sign-in-before-accessing-nurox-after-successful-sign-in-redirect-the-user-to-the-main-dashboard",
+      "featureTitle": "Implement Internet Identity authentication and gated routing so users must sign in before accessing Nurox; after successful sign-in, redirect the user to the main dashboard.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/auth/LoginView.tsx",
+        "frontend/src/components/auth/UserProfileSetupModal.tsx",
+        "frontend/src/components/shell/TopBar.tsx",
+        "frontend/src/main.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-define-a-clean-modular-frontend-architecture-with-clear-separation-between-ui-components-domain-types-api-actor-calls-and-calculation-analytics-utilities-ensure-all-calculations-live-in-dedicated-utility-modules-and-are-not-embedded-in-react-components",
+      "featureTitle": "Define a clean, modular frontend architecture with clear separation between UI components, domain types, API/actor calls, and calculation/analytics utilities; ensure all calculations live in dedicated utility modules and are not embedded in React components.",
+      "files": [
+        "frontend/src/domain/mappers.ts",
+        "frontend/src/domain/types.ts",
+        "frontend/src/utils/format.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-apply-a-premium-high-contrast-black-and-gold-terminal-style-visual-theme-across-the-application-desktop-first-tablet-compatible-using-a-clean-modern-minimal-layout-and-consistent-typography-spacing-and-component-styling",
+      "featureTitle": "Apply a premium, high-contrast black-and-gold terminal-style visual theme across the application (desktop-first, tablet compatible), using a clean modern minimal layout and consistent typography, spacing, and component styling.",
+      "files": [
+        "frontend/src/components/shell/AppLayout.tsx",
+        "frontend/src/components/shell/SideNav.tsx",
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-incorporate-the-uploaded-nurox-logo-into-the-application-shell-e-g-login-header-app-top-bar-and-provide-favicon-app-icon-assets-derived-from-it-as-static-frontend-assets",
+      "featureTitle": "Incorporate the uploaded Nurox logo into the application shell (e.g., login header/app top bar) and provide favicon/app icon assets derived from it as static frontend assets.",
+      "files": [
+        "frontend/index.html",
+        "frontend/src/components/auth/LoginView.tsx",
+        "frontend/src/components/shell/TopBar.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-the-advanced-trading-journal-a-trade-entry-form-that-captures-all-specified-trade-fields-supports-screenshot-upload-and-supports-editing-deleting-trades-include-sorting-filtering-search-tagging-and-highlighting-of-rule-violations",
+      "featureTitle": "Implement the Advanced Trading Journal: a trade entry form that captures all specified trade fields, supports screenshot upload, and supports editing/deleting trades; include sorting, filtering, search, tagging, and highlighting of rule violations.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/journal/TradesTable.tsx",
+        "frontend/src/pages/JournalPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-mathematically-accurate-forex-trading-calculation-utilities-for-trade-level-metrics-risk-amount-stop-distance-rr-ratio-profit-loss-balance-after-trade-and-percentage-gain-loss-ensure-the-lot-size-formula-matches-lot-size-risk-amount-stop-distance-pip-value",
+      "featureTitle": "Implement mathematically accurate forex/trading calculation utilities for trade-level metrics: risk amount, stop distance, RR ratio, profit/loss, balance after trade, and percentage gain/loss; ensure the lot size formula matches: Lot Size = Risk Amount / (Stop Distance × Pip Value).",
+      "files": [
+        "frontend/src/domain/mappers.ts",
+        "frontend/src/utils/tradingCalculations.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-the-main-dashboard-command-center-that-displays-all-required-kpis-and-renders-charts-for-equity-curve-monthly-performance-pair-distribution-and-session-performance-based-on-stored-trades",
+      "featureTitle": "Build the Main Dashboard (Command Center) that displays all required KPIs and renders charts for equity curve, monthly performance, pair distribution, and session performance based on stored trades.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/charts/EquityCurveChart.tsx",
+        "frontend/src/components/charts/MonthlyPerformanceChart.tsx",
+        "frontend/src/components/charts/PairDistributionChart.tsx",
+        "frontend/src/components/charts/SessionPerformanceChart.tsx",
+        "frontend/src/components/dashboard/KpiGrid.tsx",
+        "frontend/src/pages/DashboardPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-the-performance-analytics-engine-to-compute-portfolio-journal-statistics-win-rate-average-win-loss-expectancy-profit-factor-maximum-drawdown-consecutive-wins-losses-frequency-per-week-month-and-breakdowns-by-strategy-session-and-timeframe",
+      "featureTitle": "Implement the Performance Analytics Engine to compute portfolio/journal statistics (win rate, average win/loss, expectancy, profit factor, maximum drawdown, consecutive wins/losses, frequency per week/month) and breakdowns by strategy, session, and timeframe.",
+      "files": [
+        "frontend/src/pages/DashboardPage.tsx",
+        "frontend/src/utils/analytics.ts",
+        "frontend/src/utils/breakdowns.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-the-discipline-rule-tracking-system-require-a-pre-save-checklist-structure-break-confirmed-liquidity-sweep-confirmed-risk-respected-no-emotional-entry-track-rule-violations-emotional-trading-overtrading-compute-a-discipline-score-and-highlight-out-of-rule-trades",
+      "featureTitle": "Implement the Discipline & Rule Tracking System: require a pre-save checklist (structure break confirmed, liquidity sweep confirmed, risk respected, no emotional entry), track rule violations/emotional trading/overtrading, compute a Discipline Score (%), and highlight out-of-rule trades.",
+      "files": [
+        "frontend/src/components/dashboard/KpiGrid.tsx",
+        "frontend/src/components/journal/TradesTable.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-professional-risk-position-tools-as-dedicated-pages-panels-lot-size-calculator-risk-calculator-fixed-amount-risk-tool-pip-calculator-compounding-growth-simulator-drawdown-recovery-calculator-and-risk-of-ruin-calculator-all-tools-must-use-accurate-math-and-be-usable-without-saving-a-trade",
+      "featureTitle": "Add Professional Risk & Position Tools as dedicated pages/panels: lot size calculator, risk % calculator, fixed amount risk tool, pip calculator, compounding growth simulator, drawdown recovery calculator, and risk of ruin calculator; all tools must use accurate math and be usable without saving a trade.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/tools/CompoundingGrowthSimulator.tsx",
+        "frontend/src/components/tools/DrawdownRecoveryCalculator.tsx",
+        "frontend/src/components/tools/LotSizeCalculator.tsx",
+        "frontend/src/components/tools/PipCalculator.tsx",
+        "frontend/src/components/tools/RiskOfRuinCalculator.tsx",
+        "frontend/src/components/tools/RiskPercentCalculator.tsx",
+        "frontend/src/pages/ToolsPage.tsx",
+        "frontend/src/utils/toolsMath.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-11"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-settings-ui-and-persistence-for-default-account-size-default-risk-base-currency-theme-toggle-and-strategy-presets-defaults-should-prefill-journal-tool-inputs-where-appropriate",
+      "featureTitle": "Implement Settings UI and persistence for: default account size, default risk %, base currency, theme toggle, and strategy presets; defaults should prefill journal/tool inputs where appropriate.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/pages/SettingsPage.tsx",
+        "frontend/src/pages/ToolsPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-12"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-simple-rule-based-chatbot-panel-no-external-ai-that-answers-basic-questions-by-reading-the-user-s-current-stored-stats-analytics-e-g-what-is-my-win-rate-right-now-how-many-trades-this-month-and-provides-deterministic-responses",
+      "featureTitle": "Create a simple rule-based chatbot panel (no external AI) that answers basic questions by reading the user’s current stored stats/analytics (e.g., “What is my win rate right now?”, “How many trades this month?”) and provides deterministic responses.",
+      "files": [
+        "frontend/src/components/chat/ChatPanel.tsx",
+        "frontend/src/pages/DashboardPage.tsx",
+        "frontend/src/utils/chatbotRules.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-13"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-provide-a-csv-export-for-trades-that-respects-current-filters-when-applicable-and-exports-all-relevant-trade-fields-and-key-derived-metrics-in-a-consistent-column-order",
+      "featureTitle": "Provide a CSV export for trades that respects current filters (when applicable) and exports all relevant trade fields and key derived metrics in a consistent column order.",
+      "files": [
+        "frontend/src/pages/JournalPage.tsx",
+        "frontend/src/utils/csvExport.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-14"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

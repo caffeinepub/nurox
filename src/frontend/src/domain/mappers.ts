@@ -1,0 +1,90 @@
+import type { Trade, TradeView, Violation } from '../backend';
+import type { UITrade, TradeFormData } from './types';
+import { calculateRiskAmount, calculateRR, calculateProfitLoss, calculatePercentGainLoss } from '../utils/tradingCalculations';
+
+export function mapTradeViewToUI(trade: TradeView): UITrade {
+  return {
+    ...trade,
+    tags: [],
+    notes: trade.emotions || '',
+    profitLoss: trade.resultPips,
+    balanceAfter: trade.accountSize,
+    percentGainLoss: 0,
+  };
+}
+
+export function mapFormDataToTrade(
+  formData: TradeFormData,
+  existingId?: string,
+  screenshotUrl?: string
+): Trade {
+  const stopDistance = Math.abs(formData.entryPrice - formData.stopLoss);
+  const pipValue = 0.0001; // Standard for most pairs
+  const riskAmount = calculateRiskAmount(formData.accountBalance, formData.riskPercent);
+  const rr = calculateRR(formData.entryPrice, formData.stopLoss, formData.takeProfit);
+  
+  // Calculate P/L if exit data exists (for now, we'll use 0 as placeholder)
+  const profitLoss = 0;
+  const balanceAfter = formData.accountBalance + profitLoss;
+  const percentGainLoss = calculatePercentGainLoss(profitLoss, formData.accountBalance);
+
+  const violations: Violation[] = [];
+  if (!formData.structureBreakConfirmed) {
+    violations.push({
+      rule: 'Structure Break',
+      description: 'Structure break not confirmed',
+      timestamp: BigInt(Date.now()) * BigInt(1_000_000),
+    });
+  }
+  if (!formData.liquiditySweepConfirmed) {
+    violations.push({
+      rule: 'Liquidity Sweep',
+      description: 'Liquidity sweep not confirmed',
+      timestamp: BigInt(Date.now()) * BigInt(1_000_000),
+    });
+  }
+  if (!formData.riskRespected) {
+    violations.push({
+      rule: 'Risk Management',
+      description: 'Risk parameters not respected',
+      timestamp: BigInt(Date.now()) * BigInt(1_000_000),
+    });
+  }
+  if (!formData.noEmotionalEntry) {
+    violations.push({
+      rule: 'Emotional Control',
+      description: 'Emotional entry detected',
+      timestamp: BigInt(Date.now()) * BigInt(1_000_000),
+    });
+  }
+
+  const disciplineScore = ((4 - violations.length) / 4) * 100;
+
+  return {
+    id: existingId || `trade_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    entryTimestamp: BigInt(formData.date.getTime()) * BigInt(1_000_000),
+    exitTimestamp: undefined,
+    pair: formData.pair,
+    direction: formData.direction,
+    entryType: formData.strategy,
+    riskReward: rr,
+    resultPips: undefined,
+    resultRR: undefined,
+    accountSize: formData.accountBalance,
+    riskAmount,
+    positionSize: formData.lotSize,
+    stopLossSize: stopDistance,
+    positionSizeMethod: 'Manual',
+    positionSizeError: false,
+    rewardExpectation: rr * riskAmount,
+    rewardReached: false,
+    liquiditySweepConfirmed: formData.liquiditySweepConfirmed,
+    structureBreakConfirmed: formData.structureBreakConfirmed,
+    newsSusceptibility: false,
+    emotions: `Before: ${formData.emotionBefore} | After: ${formData.emotionAfter}`,
+    disciplineScore,
+    violations,
+    isScreenshot: !!screenshotUrl,
+    screenshotUrl,
+  };
+}

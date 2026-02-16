@@ -1,0 +1,4 @@
+{
+  "frontend/src/domain/mappers.ts": "Provides mapping functions between backend Trade/TradeView types and UI domain models, including form data to Trade conversion with discipline violation tracking and derived metric calculations.",
+  "frontend/src/index.css": "Global CSS file with Tailwind directives and OKLCH-based design tokens for a premium black-and-gold trading terminal theme, supporting both dark and light modes with consistent color variables for all UI components."
+}

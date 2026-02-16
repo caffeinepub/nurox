@@ -1,0 +1,170 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-16T07:52:49.462Z",
+  "summary": "The diff implements Internet Identity–gated routing (login view, authenticated layout, sign-out) and adds many frontend modules (charts, journal UI pieces, tools) plus a Motoko backend actor with trade/settings/profile-related types and some persistence. However, several requested features are either not evidenced in the provided diff summary (or appear only partially implemented due to truncation), notably full trade CRUD, screenshot upload persistence, journal sorting/filtering/search/tagging, CSV export, and some required risk tools.",
+  "missing_requirements": [
+    {
+      "id": "REQ-2",
+      "requirement": "Backend provides full CRUD methods for trades and read/update methods for settings, per-user (principal-scoped) persistence.",
+      "reason": "The backend diff shows saveTrade() and some query methods (getTrade shown partially), plus settings types/storage, but there is no clear evidence of delete/update/list methods for trades or explicit settings read/update APIs in the visible excerpt (file is truncated).",
+      "evidence": [
+        "backend/main.mo (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Advanced Trading Journal includes sorting, filtering, free-text search, tagging, and screenshot upload (with documented size limit) with persistence per trade.",
+      "reason": "TradesTable shows highlighting of rule violations, and TradeFormDialog shows checklist enforcement and save/edit flow, but there is no evidence of sorting/filter/search UI, tag fields/persistence, or screenshot upload handling/size limit/persistence in the visible components (files are truncated).",
+      "evidence": [
+        "frontend/src/components/journal/TradeFormDialog.tsx (truncated)",
+        "frontend/src/components/journal/TradesTable.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "requirement": "Trade save flow computes and stores derived values (at minimum: Risk Amount, RR, P/L, Balance After, % Gain/Loss) using utility modules (pure functions).",
+      "reason": "Lot size utilities are referenced in the tools, and mapFormDataToTrade() is called on save, but the diff summary does not show the calculation utility implementations nor evidence that the specified derived metrics (P/L, balance after, % gain/loss, RR, risk amount) are computed and stored during trade save.",
+      "evidence": [
+        "frontend/src/components/journal/TradeFormDialog.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "requirement": "Main Dashboard renders required KPIs and charts (equity curve, monthly performance, pair distribution, session performance) computed from stored trades.",
+      "reason": "Chart components and a KPI grid component were added, but the diff summary does not show DashboardPage wiring them to stored trades/analytics computations (DashboardPage not included in shown diff content).",
+      "evidence": [
+        "frontend/src/components/charts/EquityCurveChart.tsx",
+        "frontend/src/components/charts/MonthlyPerformanceChart.tsx",
+        "frontend/src/components/charts/PairDistributionChart.tsx",
+        "frontend/src/components/charts/SessionPerformanceChart.tsx",
+        "frontend/src/components/dashboard/KpiGrid.tsx",
+        "frontend/src/App.tsx (references DashboardPage)"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "requirement": "Performance Analytics Engine computes win rate, average win/loss, expectancy, profit factor, max drawdown, consecutive wins/losses, frequency per week/month, and breakdowns by strategy/session/timeframe.",
+      "reason": "UI components consume a PerformanceMetrics type and display metrics, but there is no evidence in the visible diff of the analytics utility implementations that compute the full requested statistics and breakdowns.",
+      "evidence": [
+        "frontend/src/components/dashboard/KpiGrid.tsx",
+        "frontend/src/components/chat/ChatPanel.tsx"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "requirement": "Discipline & Rule Tracking System stores violations/emotional/overtrading fields, computes a Discipline Score (%), and highlights out-of-rule trades in journal and relevant dashboard views.",
+      "reason": "Checklist gating before save is implemented and TradesTable highlights trades with violations, but the diff summary does not show how violations are created/updated, how discipline score is computed, or dashboard highlighting for out-of-rule trades.",
+      "evidence": [
+        "frontend/src/components/journal/TradeFormDialog.tsx (truncated)",
+        "frontend/src/components/journal/TradesTable.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "requirement": "All requested risk/position tools are available: lot size calculator, risk % calculator, fixed amount risk tool, pip calculator, compounding growth simulator, drawdown recovery calculator, risk of ruin calculator.",
+      "reason": "The diff shows components for lot size, pip, compounding growth, drawdown recovery, and risk of ruin, but does not show a dedicated risk % calculator page/panel or a fixed-amount risk tool component.",
+      "evidence": [
+        "frontend/src/components/tools/LotSizeCalculator.tsx (truncated)",
+        "frontend/src/components/tools/PipCalculator.tsx",
+        "frontend/src/components/tools/CompoundingGrowthSimulator.tsx (truncated)",
+        "frontend/src/components/tools/DrawdownRecoveryCalculator.tsx",
+        "frontend/src/components/tools/RiskOfRuinCalculator.tsx"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "requirement": "Settings UI and persistence for default account size, default risk %, base currency, theme toggle, strategy presets; defaults prefill journal/tool inputs.",
+      "reason": "Trade form and lot size calculator prefill from settings via useGetSettings(), but the diff summary does not show the SettingsPage UI nor backend settings read/update methods to persist all required settings fields.",
+      "evidence": [
+        "frontend/src/components/journal/TradeFormDialog.tsx (truncated)",
+        "frontend/src/components/tools/LotSizeCalculator.tsx (truncated)",
+        "frontend/src/App.tsx (references SettingsPage)",
+        "backend/main.mo (truncated, shows Settings type/storage but not methods)"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "requirement": "CSV export for trades that respects current filters and exports all relevant fields/derived metrics in consistent column order.",
+      "reason": "No CSV export UI or utility is evidenced in the visible diff summary (no export button/handler or CSV generator shown).",
+      "evidence": [
+        "frontend/src/components/journal/TradesTable.tsx (truncated)",
+        "frontend/src/App.tsx (journal route exists but no export shown)"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "User profile setup flow (UserProfile type + profile CRUD + required profile setup modal) beyond the requested trading journal/settings/auth requirements.",
+      "reason": "The BuildRequest does not ask for user profile management or a mandatory profile-setup modal after login; it only requires Internet Identity authentication and app access gating.",
+      "evidence": [
+        "backend/main.mo (truncated)",
+        "frontend/src/components/auth/UserProfileSetupModal.tsx",
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "description": "Caffeine.ai promotional footer link in SideNav.",
+      "reason": "Not requested in the BuildRequest and introduces an external promotional link in the core shell UI.",
+      "evidence": [
+        "frontend/src/components/shell/SideNav.tsx"
+      ]
+    },
+    {
+      "description": "Backend authorization/access-control and blob-storage mixin integrations.",
+      "reason": "The BuildRequest requires a single Motoko actor with persistence keyed by principal, but does not request adding an authorization framework or blob-storage mixins (and screenshot storage specifics were not evidenced on the frontend).",
+      "evidence": [
+        "backend/main.mo (truncated)"
+      ]
+    }
+  ],
+  "confidence": 0.66,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/auth/LoginView.tsx",
+    "frontend/src/components/auth/UserProfileSetupModal.tsx",
+    "frontend/src/components/charts/EquityCurveChart.tsx",
+    "frontend/src/components/charts/MonthlyPerformanceChart.tsx",
+    "frontend/src/components/charts/PairDistributionChart.tsx",
+    "frontend/src/components/charts/SessionPerformanceChart.tsx",
+    "frontend/src/components/chat/ChatPanel.tsx",
+    "frontend/src/components/dashboard/KpiGrid.tsx",
+    "frontend/src/components/journal/TradeFormDialog.tsx",
+    "frontend/src/components/journal/TradesTable.tsx",
+    "frontend/src/components/shell/AppLayout.tsx",
+    "frontend/src/components/shell/SideNav.tsx",
+    "frontend/src/components/shell/TopBar.tsx",
+    "frontend/src/components/tools/CompoundingGrowthSimulator.tsx",
+    "frontend/src/components/tools/DrawdownRecoveryCalculator.tsx",
+    "frontend/src/components/tools/LotSizeCalculator.tsx",
+    "frontend/src/components/tools/PipCalculator.tsx",
+    "frontend/src/components/tools/RiskOfRuinCalculator.tsx",
+    "frontend/src/components/tools/RiskPercentCalculator.tsx",
+    "frontend/src/domain/mappers.ts",
+    "frontend/src/domain/types.ts",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/pages/DashboardPage.tsx",
+    "frontend/src/pages/JournalPage.tsx",
+    "frontend/src/pages/SettingsPage.tsx",
+    "frontend/src/pages/ToolsPage.tsx",
+    "frontend/src/utils/analytics.ts",
+    "frontend/src/utils/breakdowns.ts",
+    "frontend/src/utils/chatbotRules.ts",
+    "frontend/src/utils/csvExport.ts",
+    "frontend/src/utils/format.ts",
+    "frontend/src/utils/toolsMath.ts",
+    "frontend/src/utils/tradingCalculations.ts",
+    "frontend/src/utils/urlParams.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}
