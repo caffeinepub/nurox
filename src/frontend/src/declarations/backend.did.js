@@ -30,9 +30,14 @@ export const Violation = IDL.Record({
   'description' : IDL.Text,
   'timestamp' : Time,
 });
-export const TradeView = IDL.Record({
+export const WinLossResult = IDL.Variant({
+  'win' : IDL.Null,
+  'loss' : IDL.Null,
+});
+export const Trade = IDL.Record({
   'id' : IDL.Text,
   'rewardExpectation' : IDL.Float64,
+  'profitLossAmount' : IDL.Float64,
   'stopLossSize' : IDL.Float64,
   'direction' : IDL.Text,
   'entryType' : IDL.Text,
@@ -40,6 +45,7 @@ export const TradeView = IDL.Record({
   'riskAmount' : IDL.Float64,
   'screenshotUrl' : IDL.Opt(IDL.Text),
   'pair' : IDL.Text,
+  'takeProfitPrice' : IDL.Float64,
   'liquiditySweepConfirmed' : IDL.Bool,
   'violations' : IDL.Vec(Violation),
   'positionSize' : IDL.Float64,
@@ -48,14 +54,18 @@ export const TradeView = IDL.Record({
   'resultRR' : IDL.Opt(IDL.Float64),
   'disciplineScore' : IDL.Float64,
   'accountSize' : IDL.Float64,
+  'stopLossPrice' : IDL.Float64,
   'positionSizeError' : IDL.Bool,
+  'grade' : IDL.Opt(IDL.Text),
   'exitTimestamp' : IDL.Opt(Time),
   'isScreenshot' : IDL.Bool,
+  'entryPrice' : IDL.Float64,
   'emotions' : IDL.Text,
   'resultPips' : IDL.Opt(IDL.Float64),
   'rewardReached' : IDL.Bool,
   'structureBreakConfirmed' : IDL.Bool,
   'positionSizeMethod' : IDL.Text,
+  'winLossResult' : WinLossResult,
 });
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 export const Settings = IDL.Record({
@@ -66,33 +76,6 @@ export const Settings = IDL.Record({
   'defaultRiskPercent' : IDL.Float64,
 });
 export const ExternalBlob = IDL.Vec(IDL.Nat8);
-export const Trade = IDL.Record({
-  'id' : IDL.Text,
-  'rewardExpectation' : IDL.Float64,
-  'stopLossSize' : IDL.Float64,
-  'direction' : IDL.Text,
-  'entryType' : IDL.Text,
-  'entryTimestamp' : Time,
-  'riskAmount' : IDL.Float64,
-  'screenshotUrl' : IDL.Opt(IDL.Text),
-  'pair' : IDL.Text,
-  'liquiditySweepConfirmed' : IDL.Bool,
-  'violations' : IDL.Vec(Violation),
-  'positionSize' : IDL.Float64,
-  'riskReward' : IDL.Opt(IDL.Float64),
-  'newsSusceptibility' : IDL.Bool,
-  'resultRR' : IDL.Opt(IDL.Float64),
-  'disciplineScore' : IDL.Float64,
-  'accountSize' : IDL.Float64,
-  'positionSizeError' : IDL.Bool,
-  'exitTimestamp' : IDL.Opt(Time),
-  'isScreenshot' : IDL.Bool,
-  'emotions' : IDL.Text,
-  'resultPips' : IDL.Opt(IDL.Float64),
-  'rewardReached' : IDL.Bool,
-  'structureBreakConfirmed' : IDL.Bool,
-  'positionSizeMethod' : IDL.Text,
-});
 
 export const idlService = IDL.Service({
   '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -124,22 +107,24 @@ export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'deleteTrade' : IDL.Func([IDL.Text], [], []),
-  'getAllTrades' : IDL.Func([], [IDL.Vec(TradeView)], ['query']),
+  'getAllTrades' : IDL.Func([], [IDL.Vec(Trade)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-  'getSettings' : IDL.Func([], [IDL.Opt(Settings)], ['query']),
-  'getTrade' : IDL.Func([IDL.Text], [TradeView], ['query']),
-  'getTradeByPair' : IDL.Func([IDL.Text], [IDL.Vec(TradeView)], ['query']),
+  'getSettings' : IDL.Func([], [Settings], ['query']),
+  'getTrade' : IDL.Func([IDL.Text], [Trade], ['query']),
+  'getTradeByPair' : IDL.Func([IDL.Text], [IDL.Vec(Trade)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'healthCheck' : IDL.Func([], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'saveScreenshot' : IDL.Func([ExternalBlob], [ExternalBlob], []),
   'saveSettings' : IDL.Func([Settings], [], []),
   'saveTrade' : IDL.Func([Trade], [], []),
+  'startFresh' : IDL.Func([], [], []),
 });
 
 export const idlInitArgs = [];
@@ -167,9 +152,11 @@ export const idlFactory = ({ IDL }) => {
     'description' : IDL.Text,
     'timestamp' : Time,
   });
-  const TradeView = IDL.Record({
+  const WinLossResult = IDL.Variant({ 'win' : IDL.Null, 'loss' : IDL.Null });
+  const Trade = IDL.Record({
     'id' : IDL.Text,
     'rewardExpectation' : IDL.Float64,
+    'profitLossAmount' : IDL.Float64,
     'stopLossSize' : IDL.Float64,
     'direction' : IDL.Text,
     'entryType' : IDL.Text,
@@ -177,6 +164,7 @@ export const idlFactory = ({ IDL }) => {
     'riskAmount' : IDL.Float64,
     'screenshotUrl' : IDL.Opt(IDL.Text),
     'pair' : IDL.Text,
+    'takeProfitPrice' : IDL.Float64,
     'liquiditySweepConfirmed' : IDL.Bool,
     'violations' : IDL.Vec(Violation),
     'positionSize' : IDL.Float64,
@@ -185,14 +173,18 @@ export const idlFactory = ({ IDL }) => {
     'resultRR' : IDL.Opt(IDL.Float64),
     'disciplineScore' : IDL.Float64,
     'accountSize' : IDL.Float64,
+    'stopLossPrice' : IDL.Float64,
     'positionSizeError' : IDL.Bool,
+    'grade' : IDL.Opt(IDL.Text),
     'exitTimestamp' : IDL.Opt(Time),
     'isScreenshot' : IDL.Bool,
+    'entryPrice' : IDL.Float64,
     'emotions' : IDL.Text,
     'resultPips' : IDL.Opt(IDL.Float64),
     'rewardReached' : IDL.Bool,
     'structureBreakConfirmed' : IDL.Bool,
     'positionSizeMethod' : IDL.Text,
+    'winLossResult' : WinLossResult,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
   const Settings = IDL.Record({
@@ -203,33 +195,6 @@ export const idlFactory = ({ IDL }) => {
     'defaultRiskPercent' : IDL.Float64,
   });
   const ExternalBlob = IDL.Vec(IDL.Nat8);
-  const Trade = IDL.Record({
-    'id' : IDL.Text,
-    'rewardExpectation' : IDL.Float64,
-    'stopLossSize' : IDL.Float64,
-    'direction' : IDL.Text,
-    'entryType' : IDL.Text,
-    'entryTimestamp' : Time,
-    'riskAmount' : IDL.Float64,
-    'screenshotUrl' : IDL.Opt(IDL.Text),
-    'pair' : IDL.Text,
-    'liquiditySweepConfirmed' : IDL.Bool,
-    'violations' : IDL.Vec(Violation),
-    'positionSize' : IDL.Float64,
-    'riskReward' : IDL.Opt(IDL.Float64),
-    'newsSusceptibility' : IDL.Bool,
-    'resultRR' : IDL.Opt(IDL.Float64),
-    'disciplineScore' : IDL.Float64,
-    'accountSize' : IDL.Float64,
-    'positionSizeError' : IDL.Bool,
-    'exitTimestamp' : IDL.Opt(Time),
-    'isScreenshot' : IDL.Bool,
-    'emotions' : IDL.Text,
-    'resultPips' : IDL.Opt(IDL.Float64),
-    'rewardReached' : IDL.Bool,
-    'structureBreakConfirmed' : IDL.Bool,
-    'positionSizeMethod' : IDL.Text,
-  });
   
   return IDL.Service({
     '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -261,22 +226,24 @@ export const idlFactory = ({ IDL }) => {
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'deleteTrade' : IDL.Func([IDL.Text], [], []),
-    'getAllTrades' : IDL.Func([], [IDL.Vec(TradeView)], ['query']),
+    'getAllTrades' : IDL.Func([], [IDL.Vec(Trade)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-    'getSettings' : IDL.Func([], [IDL.Opt(Settings)], ['query']),
-    'getTrade' : IDL.Func([IDL.Text], [TradeView], ['query']),
-    'getTradeByPair' : IDL.Func([IDL.Text], [IDL.Vec(TradeView)], ['query']),
+    'getSettings' : IDL.Func([], [Settings], ['query']),
+    'getTrade' : IDL.Func([IDL.Text], [Trade], ['query']),
+    'getTradeByPair' : IDL.Func([IDL.Text], [IDL.Vec(Trade)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'healthCheck' : IDL.Func([], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'saveScreenshot' : IDL.Func([ExternalBlob], [ExternalBlob], []),
     'saveSettings' : IDL.Func([Settings], [], []),
     'saveTrade' : IDL.Func([Trade], [], []),
+    'startFresh' : IDL.Func([], [], []),
   });
 };
 

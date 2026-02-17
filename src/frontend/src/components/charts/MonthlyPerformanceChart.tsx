@@ -9,7 +9,7 @@ interface MonthlyPerformanceChartProps {
 export default function MonthlyPerformanceChart({ data }: MonthlyPerformanceChartProps) {
   if (data.length === 0) {
     return (
-      <div className="h-80 flex items-center justify-center text-muted-foreground">
+      <div className="h-64 sm:h-80 flex items-center justify-center text-muted-foreground">
         No monthly data available yet.
       </div>
     );
@@ -17,17 +17,21 @@ export default function MonthlyPerformanceChart({ data }: MonthlyPerformanceChar
 
   return (
     <ResponsiveContainer width="100%" height={320}>
-      <BarChart data={data}>
+      <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
         <XAxis 
           dataKey="month" 
           stroke="oklch(var(--muted-foreground))"
-          fontSize={12}
+          fontSize={11}
+          angle={-45}
+          textAnchor="end"
+          height={60}
         />
         <YAxis 
           stroke="oklch(var(--muted-foreground))"
-          fontSize={12}
-          tickFormatter={(value) => `${formatNumber(value)} pips`}
+          fontSize={11}
+          tickFormatter={(value) => `${formatNumber(value)}`}
+          width={60}
         />
         <Tooltip
           contentStyle={{

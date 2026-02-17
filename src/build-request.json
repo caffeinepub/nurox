@@ -1,96 +1,111 @@
 {
   "kind": "build_request",
-  "title": "Wire Settings Strategy Presets into Journal New Trade Strategy dropdown",
-  "priority": "normal",
+  "title": "Rebuild startup flow to eliminate infinite “Initializing…” screen",
+  "projectName": "Nurox",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-15",
-      "text": "Update the Journal New Trade form so the Strategy dropdown options are sourced exclusively from the authenticated user’s saved Settings → Strategy Presets (persisted after the user clicks Save Settings), instead of a hardcoded list.",
+      "id": "REQ-1",
+      "text": "Eliminate the infinite initializing/loading screen by removing any blocking startup work from the actor creation path (e.g., admin access-control initialization) so the app can always render Login or the authenticated UI without hanging.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6",
-          "msg-8",
-          "msg-12"
+          "msg-1"
         ],
         "quotes": [
-          "connect the setting presets to this so if we type \"order block\" in setting and in strategy preset i need this to appear in journal inside the strategy selection",
-          "1.user saved presets only",
-          "its only through setting and hit save to save it and it will appear in journal inside new trades inside strategies name in dropdown"
+          "its not loading see the screenshot",
+          "search everything that related the intializing page and fix the loading bug",
+          "just rebuild the website again with new code fully rebuild the website from scratch and with no bugs",
+          "build"
         ]
       },
       "acceptanceCriteria": [
-        "After saving Settings with strategy presets (e.g., lines: \"Order Block\"), opening Journal → New Trade shows \"Order Block\" as a selectable Strategy option.",
-        "The Strategy dropdown in the New Trade form does not display any hardcoded strategies (e.g., no default list like “Structure Break”, “Other”, etc.) when presets exist; it only displays the saved presets.",
-        "Editing an existing trade still shows the trade’s saved strategy value selected in the Strategy field, even if it is not currently present in presets (no crash)."
+        "When loading the app in a fresh browser session, the UI reaches either the Login screen or the authenticated app shell within 5 seconds on a normal connection (no indefinite spinner).",
+        "Actor initialization does not block on optional admin-only initialization when no admin token is provided.",
+        "If actor initialization fails, the app shows an error state with a recovery action (retry/reload) instead of remaining stuck on “Initializing…” indefinitely."
       ]
     },
     {
-      "id": "REQ-16",
-      "text": "Parse Settings.strategyPresets (stored as a newline-delimited string) into a clean list for the Strategy dropdown by trimming whitespace, removing empty lines, and de-duplicating identical entries (case-sensitive or case-insensitive must be consistent within the app).",
+      "id": "REQ-2",
+      "text": "Implement a new non-blocking actor hook (e.g., `useSafeActor`) that replaces usage of the immutable `useActor` hook across the app, ensuring actor creation succeeds for normal users and admin initialization is attempted only when an admin token is present and can fail safely without blocking.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6",
-          "msg-12"
+          "msg-1"
         ],
         "quotes": [
-          "connect the setting presets to this",
-          "hit save to save it and it will appear in journal inside new trades inside strategies name in dropdown"
+          "search everything that related the intializing page and fix the loading bug"
         ]
       },
       "acceptanceCriteria": [
-        "Given a strategy presets textarea value containing blank lines and extra spaces, the New Trade Strategy dropdown shows only non-empty trimmed items.",
-        "Duplicate presets do not render duplicate Strategy options in the dropdown."
+        "A new hook is added (not by editing `frontend/src/hooks/useActor.ts`) that creates the backend actor for anonymous and authenticated identities.",
+        "Any admin-only initialization is gated (only runs when the `caffeineAdminToken` parameter is present and non-empty) and failures are caught and surfaced non-blockingly (e.g., warning state), not causing the actor promise to hang.",
+        "All queries/mutations that previously depended on `useActor()` are updated to use the new hook so the app does not indirectly call the immutable `useActor` at runtime."
       ]
     },
     {
-      "id": "REQ-17",
-      "text": "Adjust frontend domain typing so TradeFormData.strategy can support dynamic preset values loaded from Settings (rather than a fixed TypeScript union of hardcoded strategy strings).",
+      "id": "REQ-3",
+      "text": "Update the authenticated startup gate so it cannot display “Initializing…” forever: add a timeout and show a clear English error screen that includes the most relevant failure reason (actor init vs profile load) and provides a Retry action that re-attempts initialization without requiring a hard refresh.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6",
-          "msg-12"
+          "msg-1"
         ],
         "quotes": [
-          "strategy preset i need this to appear in journal inside the strategy selection",
-          "it will appear in journal inside new trades inside strategies name in dropdown"
+          "its not loading see the screenshot"
         ]
       },
       "acceptanceCriteria": [
-        "The frontend builds without TypeScript errors after making Strategy presets dynamic.",
-        "Saving a trade with a preset strategy stores the selected strategy value into the trade’s entryType field (via existing mapping) and it appears in the Journal table/search as before."
+        "If the authenticated shell is still initializing after a defined timeout (e.g., 15 seconds), it transitions to an error UI instead of continuing to show the spinner.",
+        "The error UI offers a Retry action that re-triggers actor/profile loading and can recover without a full page reload.",
+        "The error UI text is in English and is specific enough to guide debugging (e.g., indicates whether actor creation failed or profile fetch failed)."
       ]
     },
     {
-      "id": "REQ-18",
-      "text": "Handle the empty-presets state in the New Trade form: if Settings has no strategy presets saved (empty list), the Strategy field must make it clear the user needs to add presets in Settings and must prevent selecting arbitrary strategies from the Journal.",
+      "id": "REQ-4",
+      "text": "Ensure the Internet Identity provider URL is reliably available at runtime as `process.env.II_URL` (exact value `https://identity.ic0.app/#authorize`) so the existing immutable Internet Identity hook can initialize consistently across rebuilds.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-10",
-          "msg-12"
+          "msg-1"
         ],
         "quotes": [
-          "Strategy names should be created only in Settings",
-          "its only through setting"
+          "fix the initializing issue"
         ]
       },
       "acceptanceCriteria": [
-        "If the saved strategy preset list is empty, the New Trade form does not offer any Strategy options and indicates the user should add strategies in Settings (user-facing text must be in English).",
-        "Users cannot create/add a new strategy from the Journal form; strategies remain managed only via Settings."
+        "`frontend/index.html` sets `window.process.env.II_URL` to `https://identity.ic0.app/#authorize` at runtime.",
+        "Login via Internet Identity opens the correct identity provider URL in a new session.",
+        "No startup code path depends on missing build-time env vars for II URL (the runtime value is sufficient)."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Apply a coherent visual theme consistently across the rebuilt startup/login/initializing/error screens (dark graphite base with warm neutral surfaces and a neon-lime accent; avoid blue/purple), keeping typography and spacing consistent with the rest of the app UI.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "just rebuild the website again with new code fully rebuild the website from scratch and with no bugs"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Login, loading, and error screens share the same visual language (colors, typography, spacing) and look intentional rather than default.",
+        "Accent color usage is consistent across buttons/spinners/alerts and does not use blue/purple as the primary accent.",
+        "No user-facing text regresses to non-English."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui; compose existing UI components instead.",
-    "Keep the backend single-actor architecture (all Motoko logic in backend/main.mo); only introduce migration code if a state schema change is required."
+    "Do not edit files under frontend immutable paths: `frontend/src/hooks/useInternetIdentity.ts(x)`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, and any files under `frontend/src/components/ui`. Compose/replace behavior by adding new hooks/components and updating non-immutable call sites.",
+    "Backend must remain a single Motoko actor in `backend/main.mo` (no new backend services)."
   ],
   "nonGoals": [
-    "Adding the ability to create or edit strategy presets from the Journal page.",
-    "Introducing additional strategy metadata (colors, performance rules, tags) beyond the existing preset names.",
-    "Changing the backend Settings schema (it already includes strategyPresets as Text)."
+    "Adding new product features unrelated to fixing startup/loading (e.g., new dashboard modules, new calculators, new third-party integrations).",
+    "Introducing non-supported auth providers (only Internet Identity is allowed).",
+    "Adding external databases or non-Motoko backend services."
   ],
   "imageRequirements": {
     "required": [],

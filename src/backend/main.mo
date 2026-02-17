@@ -2,26 +2,29 @@ import Map "mo:core/Map";
 import Text "mo:core/Text";
 import Iter "mo:core/Iter";
 import Time "mo:core/Time";
-import Order "mo:core/Order";
-import Array "mo:core/Array";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
-import MixinStorage "blob-storage/Mixin";
+import Array "mo:core/Array";
 import Storage "blob-storage/Storage";
+import Order "mo:core/Order";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import MixinStorage "blob-storage/Mixin";
 
 actor {
-  // Initialize the access control system
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
-
   include MixinStorage();
 
   public type Violation = {
     rule : Text;
     description : Text;
     timestamp : Time.Time;
+  };
+
+  public type WinLossResult = {
+    #win;
+    #loss;
   };
 
   public type Trade = {
@@ -50,13 +53,23 @@ actor {
     violations : [Violation];
     isScreenshot : Bool;
     screenshotUrl : ?Text;
+    entryPrice : Float;
+    stopLossPrice : Float;
+    takeProfitPrice : Float;
+    grade : ?Text;
+    winLossResult : WinLossResult;
+    profitLossAmount : Float;
   };
 
-  public type TradeView = Trade;
-
-  public type Entry = {
-    id : Text;
-    trade : Trade;
+  module TradeView {
+    public func compareById(trade1 : ?Trade, trade2 : ?Trade) : Order.Order {
+      switch (trade1, trade2) {
+        case (null, null) { #equal };
+        case (?_, null) { #less };
+        case (null, ?_) { #greater };
+        case (?t1, ?t2) { Text.compare(t1.id, t2.id) };
+      };
+    };
   };
 
   public type Settings = {
@@ -71,66 +84,55 @@ actor {
     name : Text;
   };
 
-  module TradeView {
-    public func compareById(trade1 : ?TradeView, trade2 : ?TradeView) : Order.Order {
-      switch (trade1, trade2) {
-        case (null, null) { #equal };
-        case (?_, null) { #less };
-        case (null, ?_) { #greater };
-        case (?t1, ?t2) { Text.compare(t1.id, t2.id) };
-      };
-    };
+  let tradesStore = Map.empty<Principal, Map.Map<Text, Trade>>();
+  let settingsStore = Map.empty<Principal, Settings>();
+  let userProfilesStore = Map.empty<Principal, UserProfile>();
+
+  public query ({ caller }) func healthCheck() : async Bool {
+    true;
   };
 
-  type TradesStore = Map.Map<Text, Trade>;
-
-  let tradesStorage = Map.empty<Principal, TradesStore>();
-  let settingsStorage = Map.empty<Principal, Settings>();
-  let userProfiles = Map.empty<Principal, UserProfile>();
-
-  // User profile management (required by instructions)
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access profiles");
     };
-    userProfiles.get(caller);
+    userProfilesStore.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
     };
-    userProfiles.get(user);
+    userProfilesStore.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
-    userProfiles.add(caller, profile);
+    userProfilesStore.add(caller, profile);
   };
 
-  // Trade management functions - adapted for immutable persistent types
   public shared ({ caller }) func saveTrade(trade : Trade) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save trades");
     };
-
-    let userTrades = switch (tradesStorage.get(caller)) {
-      case (null) { Map.empty<Text, Trade>() };
-      case (?trades) { trades };
+    let userTrades = switch (tradesStore.get(caller)) {
+      case (null) {
+        let newStore = Map.empty<Text, Trade>();
+        newStore;
+      };
+      case (?existing) { existing };
     };
-
     userTrades.add(trade.id, trade);
-    tradesStorage.add(caller, userTrades);
+    tradesStore.add(caller, userTrades);
   };
 
-  public query ({ caller }) func getTrade(tradeId : Text) : async TradeView {
+  public query ({ caller }) func getTrade(tradeId : Text) : async Trade {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access trades");
     };
-
-    switch (tradesStorage.get(caller)) {
+    switch (tradesStore.get(caller)) {
       case (null) { Runtime.trap("No trades found for this user") };
       case (?userTrades) {
         switch (userTrades.get(tradeId)) {
@@ -145,23 +147,21 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can delete trades");
     };
-
-    switch (tradesStorage.get(caller)) {
+    switch (tradesStore.get(caller)) {
       case (null) { Runtime.trap("No trades found for this user") };
       case (?userTrades) {
         let updatedTrades = Map.empty<Text, Trade>();
         userTrades.entries().forEach(func((id, trade)) { if (id != tradeId) { updatedTrades.add(id, trade) } });
-        tradesStorage.add(caller, updatedTrades);
+        tradesStore.add(caller, updatedTrades);
       };
     };
   };
 
-  public query ({ caller }) func getAllTrades() : async [TradeView] {
+  public query ({ caller }) func getAllTrades() : async [Trade] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access trades");
     };
-
-    switch (tradesStorage.get(caller)) {
+    switch (tradesStore.get(caller)) {
       case (null) { [] };
       case (?userTrades) {
         userTrades.values().toArray();
@@ -169,12 +169,11 @@ actor {
     };
   };
 
-  public query ({ caller }) func getTradeByPair(pair : Text) : async [TradeView] {
+  public query ({ caller }) func getTradeByPair(pair : Text) : async [Trade] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access trades");
     };
-
-    switch (tradesStorage.get(caller)) {
+    switch (tradesStore.get(caller)) {
       case (null) { [] };
       case (?userTrades) {
         Array.fromIter(
@@ -186,29 +185,44 @@ actor {
     };
   };
 
-  // Settings management functions
+  public query ({ caller }) func getSettings() : async Settings {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access settings");
+    };
+    switch (settingsStore.get(caller)) {
+      case (?settings) { settings };
+      case (null) {
+        {
+          defaultAccount = 0.0;
+          defaultRiskPercent = 0.0;
+          baseCurrency = "";
+          theme = "light";
+          strategyPresets = "";
+        };
+      };
+    };
+  };
+
   public shared ({ caller }) func saveSettings(settings : Settings) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save settings");
     };
-
-    settingsStorage.add(caller, settings);
+    settingsStore.add(caller, settings);
   };
 
-  public query ({ caller }) func getSettings() : async ?Settings {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can access settings");
-    };
-
-    settingsStorage.get(caller);
-  };
-
-  // Screenshot management
   public shared ({ caller }) func saveScreenshot(image : Storage.ExternalBlob) : async Storage.ExternalBlob {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save screenshots");
     };
-
     image;
+  };
+
+  public shared ({ caller }) func startFresh() : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can clear their own data");
+    };
+    tradesStore.remove(caller);
+    settingsStore.remove(caller);
+    userProfilesStore.remove(caller);
   };
 };

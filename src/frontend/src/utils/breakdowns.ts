@@ -1,7 +1,7 @@
-import type { TradeView } from '../backend';
+import type { Trade } from '../backend';
 import type { MonthlyPerformance, PairDistribution, SessionPerformance } from '../domain/types';
 
-export function calculateMonthlyPerformance(trades: TradeView[]): MonthlyPerformance[] {
+export function calculateMonthlyPerformance(trades: Trade[]): MonthlyPerformance[] {
   const monthlyMap = new Map<string, { profit: number; trades: number }>();
 
   trades.forEach(trade => {
@@ -10,7 +10,7 @@ export function calculateMonthlyPerformance(trades: TradeView[]): MonthlyPerform
     
     const existing = monthlyMap.get(monthKey) || { profit: 0, trades: 0 };
     monthlyMap.set(monthKey, {
-      profit: existing.profit + (trade.resultPips || 0),
+      profit: existing.profit + (trade.profitLossAmount || 0),
       trades: existing.trades + 1,
     });
   });
@@ -24,14 +24,14 @@ export function calculateMonthlyPerformance(trades: TradeView[]): MonthlyPerform
     .sort((a, b) => a.month.localeCompare(b.month));
 }
 
-export function calculatePairDistribution(trades: TradeView[]): PairDistribution[] {
+export function calculatePairDistribution(trades: Trade[]): PairDistribution[] {
   const pairMap = new Map<string, { trades: number; profit: number }>();
 
   trades.forEach(trade => {
     const existing = pairMap.get(trade.pair) || { trades: 0, profit: 0 };
     pairMap.set(trade.pair, {
       trades: existing.trades + 1,
-      profit: existing.profit + (trade.resultPips || 0),
+      profit: existing.profit + (trade.profitLossAmount || 0),
     });
   });
 
@@ -44,7 +44,7 @@ export function calculatePairDistribution(trades: TradeView[]): PairDistribution
     .sort((a, b) => b.trades - a.trades);
 }
 
-export function calculateSessionPerformance(trades: TradeView[]): SessionPerformance[] {
+export function calculateSessionPerformance(trades: Trade[]): SessionPerformance[] {
   const sessions: ('Asia' | 'London' | 'New York')[] = ['Asia', 'London', 'New York'];
   
   return sessions.map(session => {
@@ -55,9 +55,9 @@ export function calculateSessionPerformance(trades: TradeView[]): SessionPerform
       return hour >= 16 && hour < 24;
     });
 
-    const wins = sessionTrades.filter(t => (t.resultPips || 0) > 0).length;
+    const wins = sessionTrades.filter(t => t.profitLossAmount > 0).length;
     const winRate = sessionTrades.length > 0 ? (wins / sessionTrades.length) * 100 : 0;
-    const profit = sessionTrades.reduce((sum, t) => sum + (t.resultPips || 0), 0);
+    const profit = sessionTrades.reduce((sum, t) => sum + (t.profitLossAmount || 0), 0);
 
     return {
       session,

@@ -1,10 +1,10 @@
-import type { TradeView, Trade as BackendTrade, Violation } from '../backend';
+import type { Trade, Violation, WinLossResult } from '../backend';
 
 export type Direction = 'Buy' | 'Sell';
 export type Session = 'Asia' | 'London' | 'New York';
 export type Timeframe = 'M1' | 'M5' | 'M15' | 'M30' | 'H1' | 'H4' | 'D1' | 'W1';
 
-export interface UITrade extends TradeView {
+export interface UITrade extends Trade {
   tags?: string[];
   notes?: string;
   profitLoss?: number;
@@ -33,6 +33,9 @@ export interface TradeFormData {
   liquiditySweepConfirmed: boolean;
   riskRespected: boolean;
   noEmotionalEntry: boolean;
+  tradeGrade?: string;
+  winLossResult?: WinLossResult;
+  profitLossAmount?: number;
 }
 
 export interface PerformanceMetrics {
@@ -49,6 +52,11 @@ export interface PerformanceMetrics {
   worstTrade: number;
   riskConsistencyScore: number;
   disciplineScore: number;
+  totalWins: number;
+  totalLosses: number;
+  totalProfit: number;
+  totalLoss: number;
+  winLossRatio: number;
 }
 
 export interface EquityPoint {

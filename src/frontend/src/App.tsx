@@ -1,97 +1,39 @@
-import { useInternetIdentity } from './hooks/useInternetIdentity';
-import { useGetCallerUserProfile } from './hooks/useQueries';
-import { createRouter, RouterProvider, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
+import { useInternetIdentity } from './hooks/useInternetIdentity';
+import { createAppQueryClient } from './app/queryClient';
+import AuthenticatedApp from './app/AuthenticatedApp';
 import LoginView from './components/auth/LoginView';
-import UserProfileSetupModal from './components/auth/UserProfileSetupModal';
-import AppLayout from './components/shell/AppLayout';
-import DashboardPage from './pages/DashboardPage';
-import JournalPage from './pages/JournalPage';
-import ToolsPage from './pages/ToolsPage';
-import SettingsPage from './pages/SettingsPage';
+import { Loader2 } from 'lucide-react';
 
-function RootLayout() {
-  return (
-    <>
-      <Outlet />
-      <Toaster />
-    </>
-  );
-}
+const queryClient = createAppQueryClient();
 
-function AuthenticatedApp() {
-  const { identity } = useInternetIdentity();
-  const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
-
-  const isAuthenticated = !!identity;
-  const showProfileSetup = isAuthenticated && !profileLoading && isFetched && userProfile === null;
-
-  if (!isAuthenticated) {
-    return <LoginView />;
-  }
-
-  if (showProfileSetup) {
-    return <UserProfileSetupModal />;
-  }
-
-  return (
-    <AppLayout>
-      <Outlet />
-    </AppLayout>
-  );
-}
-
-const rootRoute = createRootRoute({
-  component: RootLayout,
-});
-
-const authRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  id: 'auth',
-  component: AuthenticatedApp,
-});
-
-const dashboardRoute = createRoute({
-  getParentRoute: () => authRoute,
-  path: '/',
-  component: DashboardPage,
-});
-
-const journalRoute = createRoute({
-  getParentRoute: () => authRoute,
-  path: '/journal',
-  component: JournalPage,
-});
-
-const toolsRoute = createRoute({
-  getParentRoute: () => authRoute,
-  path: '/tools',
-  component: ToolsPage,
-});
-
-const settingsRoute = createRoute({
-  getParentRoute: () => authRoute,
-  path: '/settings',
-  component: SettingsPage,
-});
-
-const routeTree = rootRoute.addChildren([
-  authRoute.addChildren([dashboardRoute, journalRoute, toolsRoute, settingsRoute]),
-]);
-
-const router = createRouter({ routeTree });
-
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router;
-  }
-}
-
+/**
+ * Root application component with authentication gate that shows LoginView when unauthenticated and AuthenticatedApp when authenticated; identity initialization is non-blocking with a simple loading state.
+ */
 export default function App() {
+  const { identity, isInitializing } = useInternetIdentity();
+  const isAuthenticated = !!identity;
+
+  // Show minimal loading only during initial identity check
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-      <RouterProvider router={router} />
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <QueryClientProvider client={queryClient}>
+        {isAuthenticated ? <AuthenticatedApp /> : <LoginView />}
+        <Toaster />
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

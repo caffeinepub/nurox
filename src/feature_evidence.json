@@ -2,10 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-journal-new-trade-form-so-the-strategy-dropdown-options-are-sourced-exclusively-from-the-authenticated-user-s-saved-settings-strategy-presets-persisted-after-the-user-clicks-save-settings-instead-of-a-hardcoded-list",
-      "featureTitle": "Update the Journal New Trade form so the Strategy dropdown options are sourced exclusively from the authenticated user’s saved Settings → Strategy Presets (persisted after the user clicks Save Settings), instead of a hardcoded list.",
+      "featureId": "feature-eliminate-the-infinite-initializing-loading-screen-by-removing-any-blocking-startup-work-from-the-actor-creation-path-e-g-admin-access-control-initialization-so-the-app-can-always-render-login-or-the-authenticated-ui-without-hanging",
+      "featureTitle": "Eliminate the infinite initializing/loading screen by removing any blocking startup work from the actor creation path (e.g., admin access-control initialization) so the app can always render Login or the authenticated UI without hanging.",
       "files": [
-        "frontend/src/components/journal/TradeFormDialog.tsx"
+        "frontend/src/app/AuthenticatedApp.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/hooks/useSafeActor.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,16 +19,17 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-15"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-parse-settings-strategypresets-stored-as-a-newline-delimited-string-into-a-clean-list-for-the-strategy-dropdown-by-trimming-whitespace-removing-empty-lines-and-de-duplicating-identical-entries-case-sensitive-or-case-insensitive-must-be-consistent-within-the-app",
-      "featureTitle": "Parse Settings.strategyPresets (stored as a newline-delimited string) into a clean list for the Strategy dropdown by trimming whitespace, removing empty lines, and de-duplicating identical entries (case-sensitive or case-insensitive must be consistent within the app).",
+      "featureId": "feature-implement-a-new-non-blocking-actor-hook-e-g-usesafeactor-that-replaces-usage-of-the-immutable-useactor-hook-across-the-app-ensuring-actor-creation-succeeds-for-normal-users-and-admin-initialization-is-attempted-only-when-an-admin-token-is-present-and-can-fail-safely-without-blocking",
+      "featureTitle": "Implement a new non-blocking actor hook (e.g., `useSafeActor`) that replaces usage of the immutable `useActor` hook across the app, ensuring actor creation succeeds for normal users and admin initialization is attempted only when an admin token is present and can fail safely without blocking.",
       "files": [
-        "frontend/src/components/journal/TradeFormDialog.tsx",
-        "frontend/src/utils/strategyPresets.ts"
+        "frontend/src/app/AuthenticatedApp.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/hooks/useSafeActor.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -38,16 +41,18 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-16"
+        "REQ-2"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-adjust-frontend-domain-typing-so-tradeformdata-strategy-can-support-dynamic-preset-values-loaded-from-settings-rather-than-a-fixed-typescript-union-of-hardcoded-strategy-strings",
-      "featureTitle": "Adjust frontend domain typing so TradeFormData.strategy can support dynamic preset values loaded from Settings (rather than a fixed TypeScript union of hardcoded strategy strings).",
+      "featureId": "feature-update-the-authenticated-startup-gate-so-it-cannot-display-initializing-forever-add-a-timeout-and-show-a-clear-english-error-screen-that-includes-the-most-relevant-failure-reason-actor-init-vs-profile-load-and-provides-a-retry-action-that-re-attempts-initialization-without-requiring-a-hard-refresh",
+      "featureTitle": "Update the authenticated startup gate so it cannot display “Initializing…” forever: add a timeout and show a clear English error screen that includes the most relevant failure reason (actor init vs profile load) and provides a Retry action that re-attempts initialization without requiring a hard refresh.",
       "files": [
-        "frontend/src/components/journal/TradeFormDialog.tsx",
-        "frontend/src/domain/types.ts"
+        "frontend/src/app/AuthenticatedApp.tsx",
+        "frontend/src/components/startup/StartupErrorScreen.tsx",
+        "frontend/src/hooks/useStartupGate.ts",
+        "frontend/src/utils/startupErrorClassification.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -59,16 +64,18 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-17"
+        "REQ-3"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-handle-the-empty-presets-state-in-the-new-trade-form-if-settings-has-no-strategy-presets-saved-empty-list-the-strategy-field-must-make-it-clear-the-user-needs-to-add-presets-in-settings-and-must-prevent-selecting-arbitrary-strategies-from-the-journal",
-      "featureTitle": "Handle the empty-presets state in the New Trade form: if Settings has no strategy presets saved (empty list), the Strategy field must make it clear the user needs to add presets in Settings and must prevent selecting arbitrary strategies from the Journal.",
+      "featureId": "feature-apply-a-coherent-visual-theme-consistently-across-the-rebuilt-startup-login-initializing-error-screens-dark-graphite-base-with-warm-neutral-surfaces-and-a-neon-lime-accent-avoid-blue-purple-keeping-typography-and-spacing-consistent-with-the-rest-of-the-app-ui",
+      "featureTitle": "Apply a coherent visual theme consistently across the rebuilt startup/login/initializing/error screens (dark graphite base with warm neutral surfaces and a neon-lime accent; avoid blue/purple), keeping typography and spacing consistent with the rest of the app UI.",
       "files": [
-        "frontend/src/components/journal/TradeFormDialog.tsx",
-        "frontend/src/pages/SettingsPage.tsx"
+        "frontend/src/app/AuthenticatedApp.tsx",
+        "frontend/src/components/auth/LoginView.tsx",
+        "frontend/src/components/startup/StartupErrorScreen.tsx",
+        "frontend/src/index.css"
       ],
       "components": [
         "authorization@4.0.0",
@@ -80,7 +87,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-18"
+        "REQ-5"
       ],
       "confidence": "high"
     }

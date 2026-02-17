@@ -1,79 +1,104 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-16T08:47:27.230Z",
+  "generatedAt": "2026-02-17T07:03:41.730Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
+    "total": 5,
     "implemented": 4,
     "items": [
       {
-        "id": "REQ-15",
-        "summary": "Update the Journal New Trade form so the Strategy dropdown options are sourced exclusively from the authenticated user’s saved Settings → Strategy Presets (persisted after the user clicks Save Settings), instead of a hardcoded list.",
+        "id": "REQ-1",
+        "summary": "Eliminate the infinite initializing/loading screen by removing any blocking startup work from the actor creation path (e.g., admin access-control initialization) so the app can always render Login or the authenticated UI without hanging.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/journal/TradeFormDialog.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/hooks/useSafeActor.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/app/AuthenticatedApp.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/journal/TradeFormDialog.tsx"
+          "frontend/src/hooks/useSafeActor.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/app/AuthenticatedApp.tsx"
         ]
       },
       {
-        "id": "REQ-16",
-        "summary": "Parse Settings.strategyPresets (stored as a newline-delimited string) into a clean list for the Strategy dropdown by trimming whitespace, removing empty lines, and de-duplicating identical entries (case-sensitive or case-insensitive must be consistent within the app).",
+        "id": "REQ-2",
+        "summary": "Implement a new non-blocking actor hook (e.g., `useSafeActor`) that replaces usage of the immutable `useActor` hook across the app, ensuring actor creation succeeds for normal users and admin initialization is attempted only when an admin token is present and can fail safely without blocking.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/strategyPresets.ts",
-          "frontend/src/components/journal/TradeFormDialog.tsx"
+          "frontend/src/hooks/useSafeActor.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/app/AuthenticatedApp.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/utils/strategyPresets.ts",
-          "frontend/src/components/journal/TradeFormDialog.tsx"
+          "frontend/src/hooks/useSafeActor.ts",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/app/AuthenticatedApp.tsx"
         ]
       },
       {
-        "id": "REQ-17",
-        "summary": "Adjust frontend domain typing so TradeFormData.strategy can support dynamic preset values loaded from Settings (rather than a fixed TypeScript union of hardcoded strategy strings).",
+        "id": "REQ-3",
+        "summary": "Update the authenticated startup gate so it cannot display “Initializing…” forever: add a timeout and show a clear English error screen that includes the most relevant failure reason (actor init vs profile load) and provides a Retry action that re-attempts initialization without requiring a hard refresh.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/domain/types.ts",
-          "frontend/src/components/journal/TradeFormDialog.tsx",
-          "frontend/src/domain/mappers.ts"
+          "frontend/src/hooks/useStartupGate.ts",
+          "frontend/src/utils/startupErrorClassification.ts",
+          "frontend/src/components/startup/StartupErrorScreen.tsx",
+          "frontend/src/app/AuthenticatedApp.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/domain/types.ts",
-          "frontend/src/components/journal/TradeFormDialog.tsx"
+          "frontend/src/hooks/useStartupGate.ts",
+          "frontend/src/utils/startupErrorClassification.ts",
+          "frontend/src/components/startup/StartupErrorScreen.tsx",
+          "frontend/src/app/AuthenticatedApp.tsx"
         ]
       },
       {
-        "id": "REQ-18",
-        "summary": "Handle the empty-presets state in the New Trade form: if Settings has no strategy presets saved (empty list), the Strategy field must make it clear the user needs to add presets in Settings and must prevent selecting arbitrary strategies from the Journal.",
+        "id": "REQ-4",
+        "summary": "Ensure the Internet Identity provider URL is reliably available at runtime as `process.env.II_URL` (exact value `https://identity.ic0.app/#authorize`) so the existing immutable Internet Identity hook can initialize consistently across rebuilds.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/index.html"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Apply a coherent visual theme consistently across the rebuilt startup/login/initializing/error screens (dark graphite base with warm neutral surfaces and a neon-lime accent; avoid blue/purple), keeping typography and spacing consistent with the rest of the app UI.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/journal/TradeFormDialog.tsx",
-          "frontend/src/pages/SettingsPage.tsx"
+          "frontend/src/index.css",
+          "frontend/src/components/startup/StartupErrorScreen.tsx",
+          "frontend/src/components/auth/LoginView.tsx",
+          "frontend/src/app/AuthenticatedApp.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/journal/TradeFormDialog.tsx",
-          "frontend/src/pages/SettingsPage.tsx"
+          "frontend/src/index.css",
+          "frontend/src/components/startup/StartupErrorScreen.tsx",
+          "frontend/src/components/auth/LoginView.tsx",
+          "frontend/src/app/AuthenticatedApp.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
     "build-request.json",
-    "build-template/README.md",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/journal/TradeFormDialog.tsx",
-    "frontend/src/domain/types.ts",
-    "frontend/src/pages/SettingsPage.tsx",
-    "frontend/src/utils/strategyPresets.ts",
+    "frontend/src/App.tsx",
+    "frontend/src/app/AuthenticatedApp.tsx",
+    "frontend/src/components/auth/LoginView.tsx",
+    "frontend/src/components/startup/StartupErrorScreen.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useSafeActor.ts",
+    "frontend/src/hooks/useStartupGate.ts",
+    "frontend/src/index.css",
+    "frontend/src/utils/startupErrorClassification.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -2,7 +2,30 @@
     <head>
         <meta charset='UTF-8' />
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-        <title>Nurox</title>
+        <title>Nurox - Beyond the chart</title>
+        
+        <!-- Favicon -->
+        <link rel='icon' type='image/png' sizes='32x32' href='/assets/generated/nurox-favicon-32.dim_32x32.png' />
+        <link rel='icon' type='image/png' sizes='16x16' href='/assets/generated/nurox-favicon-16.dim_16x16.png' />
+        
+        <!-- Web App Manifest -->
+        <link rel='manifest' href='/manifest.webmanifest' />
+        
+        <!-- Theme color -->
+        <meta name='theme-color' content='#000000' />
+        
+        <!-- App metadata -->
+        <meta name='description' content='Nurox - Beyond the chart. Your professional trading command center.' />
+        <meta name='apple-mobile-web-app-capable' content='yes' />
+        <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent' />
+        <meta name='apple-mobile-web-app-title' content='Nurox' />
+        
+        <!-- Environment configuration -->
+        <script>
+            window.process = window.process || {};
+            window.process.env = window.process.env || {};
+            window.process.env.II_URL = 'https://identity.ic0.app/#authorize';
+        </script>
     </head>
     <body>
         <div id='root'></div>

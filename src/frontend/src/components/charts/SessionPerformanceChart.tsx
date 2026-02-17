@@ -9,7 +9,7 @@ interface SessionPerformanceChartProps {
 export default function SessionPerformanceChart({ data }: SessionPerformanceChartProps) {
   if (data.length === 0) {
     return (
-      <div className="h-80 flex items-center justify-center text-muted-foreground">
+      <div className="h-64 sm:h-80 flex items-center justify-center text-muted-foreground">
         No session data available yet.
       </div>
     );
@@ -17,16 +17,17 @@ export default function SessionPerformanceChart({ data }: SessionPerformanceChar
 
   return (
     <ResponsiveContainer width="100%" height={320}>
-      <BarChart data={data}>
+      <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
         <XAxis 
           dataKey="session" 
           stroke="oklch(var(--muted-foreground))"
-          fontSize={12}
+          fontSize={11}
         />
         <YAxis 
           stroke="oklch(var(--muted-foreground))"
-          fontSize={12}
+          fontSize={11}
+          width={50}
         />
         <Tooltip
           contentStyle={{
@@ -35,7 +36,7 @@ export default function SessionPerformanceChart({ data }: SessionPerformanceChar
             borderRadius: '8px',
           }}
         />
-        <Legend />
+        <Legend wrapperStyle={{ fontSize: '12px' }} />
         <Bar dataKey="trades" fill="oklch(var(--chart-1))" radius={[8, 8, 0, 0]} name="Trades" />
         <Bar dataKey="winRate" fill="oklch(var(--chart-2))" radius={[8, 8, 0, 0]} name="Win Rate %" />
       </BarChart>

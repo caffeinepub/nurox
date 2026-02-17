@@ -9,7 +9,7 @@ interface EquityCurveChartProps {
 export default function EquityCurveChart({ data }: EquityCurveChartProps) {
   if (data.length === 0) {
     return (
-      <div className="h-80 flex items-center justify-center text-muted-foreground">
+      <div className="h-64 sm:h-80 flex items-center justify-center text-muted-foreground text-center px-4">
         No equity data available yet. Start trading to see your equity curve!
       </div>
     );
@@ -22,17 +22,21 @@ export default function EquityCurveChart({ data }: EquityCurveChartProps) {
 
   return (
     <ResponsiveContainer width="100%" height={320}>
-      <LineChart data={chartData}>
+      <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
         <XAxis 
           dataKey="date" 
           stroke="oklch(var(--muted-foreground))"
-          fontSize={12}
+          fontSize={11}
+          angle={-45}
+          textAnchor="end"
+          height={60}
         />
         <YAxis 
           stroke="oklch(var(--muted-foreground))"
-          fontSize={12}
+          fontSize={11}
           tickFormatter={(value) => formatCurrency(value, 'USD')}
+          width={70}
         />
         <Tooltip
           contentStyle={{

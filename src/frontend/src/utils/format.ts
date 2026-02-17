@@ -1,4 +1,10 @@
+/**
+ * Safe formatting utilities that handle NaN, Infinity, and undefined values gracefully.
+ * Prevents broken UI display in analytics and dashboard components.
+ */
+
 export function formatCurrency(value: number, currency: string = 'USD'): string {
+  if (!isFinite(value)) return 'N/A';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
@@ -8,10 +14,18 @@ export function formatCurrency(value: number, currency: string = 'USD'): string 
 }
 
 export function formatPercent(value: number, decimals: number = 2): string {
+  if (!isFinite(value)) return 'N/A';
   return `${value.toFixed(decimals)}%`;
 }
 
 export function formatNumber(value: number, decimals: number = 2): string {
+  if (!isFinite(value)) return 'N/A';
+  return value.toFixed(decimals);
+}
+
+export function formatRatio(value: number, decimals: number = 2): string {
+  if (value === Infinity) return '∞';
+  if (!isFinite(value)) return 'N/A';
   return value.toFixed(decimals);
 }
 

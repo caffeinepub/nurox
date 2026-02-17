@@ -1,4 +1,4 @@
-import type { TradeView } from '../../backend';
+import type { Trade } from '../../backend';
 import { formatDate, formatNumber, formatPercent } from '../../utils/format';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface TradesTableProps {
-  trades: TradeView[];
+  trades: Trade[];
   isLoading: boolean;
   onEdit: (tradeId: string) => void;
   onDelete: (tradeId: string) => void;
@@ -33,36 +33,35 @@ export default function TradesTable({ trades, isLoading, onEdit, onDelete }: Tra
   }
 
   return (
-    <div className="rounded-md border border-border/40">
+    <div className="rounded-md border border-border/40 overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Pair</TableHead>
-            <TableHead>Direction</TableHead>
-            <TableHead>Strategy</TableHead>
-            <TableHead>RR</TableHead>
-            <TableHead>Result</TableHead>
-            <TableHead>Discipline</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="whitespace-nowrap">Date</TableHead>
+            <TableHead className="whitespace-nowrap">Pair</TableHead>
+            <TableHead className="whitespace-nowrap">Direction</TableHead>
+            <TableHead className="whitespace-nowrap">Strategy</TableHead>
+            <TableHead className="whitespace-nowrap">RR</TableHead>
+            <TableHead className="whitespace-nowrap">Trade Grade</TableHead>
+            <TableHead className="whitespace-nowrap">Discipline</TableHead>
+            <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {trades.map((trade) => {
             const hasViolations = trade.violations.length > 0;
-            const isWin = (trade.resultPips || 0) > 0;
             
             return (
               <TableRow 
                 key={trade.id}
                 className={hasViolations ? 'bg-destructive/5 border-l-4 border-l-destructive' : ''}
               >
-                <TableCell className="font-medium">
+                <TableCell className="font-medium whitespace-nowrap">
                   {formatDate(trade.entryTimestamp)}
                 </TableCell>
-                <TableCell>{trade.pair}</TableCell>
+                <TableCell className="whitespace-nowrap">{trade.pair}</TableCell>
                 <TableCell>
-                  <Badge variant={trade.direction === 'Buy' ? 'default' : 'secondary'}>
+                  <Badge variant={trade.direction === 'Buy' ? 'default' : 'secondary'} className="whitespace-nowrap">
                     {trade.direction === 'Buy' ? (
                       <TrendingUp className="h-3 w-3 mr-1" />
                     ) : (
@@ -71,25 +70,25 @@ export default function TradesTable({ trades, isLoading, onEdit, onDelete }: Tra
                     {trade.direction}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-sm">{trade.entryType}</TableCell>
-                <TableCell>{trade.riskReward ? formatNumber(trade.riskReward) : 'N/A'}</TableCell>
-                <TableCell>
-                  {trade.resultPips !== undefined ? (
-                    <span className={isWin ? 'text-green-500' : 'text-red-500'}>
-                      {isWin ? '+' : ''}{formatNumber(trade.resultPips)} pips
-                    </span>
+                <TableCell className="text-sm max-w-[150px] truncate">{trade.entryType}</TableCell>
+                <TableCell className="whitespace-nowrap">{trade.riskReward ? formatNumber(trade.riskReward) : 'N/A'}</TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {trade.grade ? (
+                    <Badge variant="outline" className="font-semibold">
+                      {trade.grade}
+                    </Badge>
                   ) : (
-                    <span className="text-muted-foreground">Pending</span>
+                    <span className="text-muted-foreground">—</span>
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 whitespace-nowrap">
                     <span className={trade.disciplineScore >= 80 ? 'text-green-500' : 'text-yellow-500'}>
                       {formatPercent(trade.disciplineScore, 0)}
                     </span>
                     {hasViolations && (
                       <Badge variant="destructive" className="text-xs">
-                        {trade.violations.length} violations
+                        {trade.violations.length}
                       </Badge>
                     )}
                   </div>

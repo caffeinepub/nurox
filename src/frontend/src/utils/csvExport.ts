@@ -1,7 +1,7 @@
-import type { TradeView } from '../backend';
+import type { Trade } from '../backend';
 import { formatDate, formatNumber } from './format';
 
-export function generateTradesCSV(trades: TradeView[]): string {
+export function generateTradesCSV(trades: Trade[]): string {
   const headers = [
     'ID',
     'Date',

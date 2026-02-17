@@ -1,56 +1,54 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-16T08:47:27.226Z",
-  "summary": "Diff adds a strategy presets parser utility, changes TradeFormData.strategy to a dynamic string, and updates the Journal trade form logic to derive the selected strategy from Settings.strategyPresets and to preserve an edited trade’s existing strategy. However, the diff summary does not include the rendered Strategy dropdown UI, so it’s not fully evidenced that the dropdown options are exclusively presets and that the empty-presets UX prevents arbitrary selection.",
+  "generatedAt": "2026-02-17T07:03:41.727Z",
+  "summary": "Most startup-flow requirements appear implemented via new non-blocking actor hook (useSafeActor), a startup gate with timeout and retry (useStartupGate), and a dedicated error screen; however, the runtime Internet Identity URL injection (process.env.II_URL via index.html) is not evidenced in the diff. The diff summary also suggests unrelated new/expanded UI features (e.g., navigation entries, dashboards/tools) that are outside the stated non-goals.",
   "missing_requirements": [
     {
-      "id": "REQ-15",
-      "requirement": "The Strategy dropdown options in Journal → New Trade are sourced exclusively from authenticated user’s saved Settings → Strategy Presets (no hardcoded list).",
-      "reason": "While TradeFormDialog now parses settings.strategyPresets and uses it to set a default strategy value, the diff snippet is truncated before the dropdown render, so it is not evidenced that the Select options contain only presets and contain no hardcoded fallback items.",
+      "id": "REQ-4",
+      "requirement": "Ensure the Internet Identity provider URL is reliably available at runtime as process.env.II_URL (exact value https://identity.ic0.app/#authorize) by setting window.process.env.II_URL in frontend/index.html.",
+      "reason": "No changes to frontend/index.html (or any runtime env injection) are shown in the diff summary, so the required runtime definition of window.process.env.II_URL is not evidenced.",
       "evidence": [
-        "frontend/src/components/journal/TradeFormDialog.tsx"
-      ]
-    },
-    {
-      "id": "REQ-18",
-      "requirement": "Handle empty-presets state: show English guidance to add presets in Settings and prevent selecting arbitrary strategies from the Journal form when presets list is empty.",
-      "reason": "TradeFormDialog computes hasPresets and sets strategy to '' when none exist, but the diff snippet is truncated before the Strategy field rendering; there is no explicit evidenced UI/behavior showing a disabled Select/no options plus an English message.",
-      "evidence": [
-        "frontend/src/components/journal/TradeFormDialog.tsx"
+        "File diff summary shows no modified/added frontend/index.html"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Global CSS/theme token changes for a premium black-and-gold theme.",
-      "reason": "Not part of REQ-15–REQ-18; unrelated styling work is mentioned in the diff summary.",
+      "description": "Added/changed navigation item \"About Me\" in the app shell navigation.",
+      "reason": "This is a new product feature unrelated to fixing startup/loading and is explicitly outside the scope (non-goals).",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/src/index.css)"
+        "frontend-file-summaries.txt: \"frontend/src/components/shell/SideNav.tsx\": \"...including new \\\"About Me\\\" entry...\"",
+        "frontend-file-summaries.txt: \"frontend/src/components/shell/MobileNav.tsx\": \"...navigation items including About Me...\""
       ]
     },
     {
-      "description": "React Query hook enhancements (cache invalidation / immediate UI refresh after save).",
-      "reason": "Not requested by REQ-15–REQ-18; could be supportive but is an additional behavior change beyond the specified scope.",
+      "description": "Dashboard enhancements including KPIs/analytics/charts and a chatbot.",
+      "reason": "This constitutes new dashboard modules/features, which are listed as non-goals unrelated to fixing startup/loading.",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/src/hooks/useQueries.ts)"
+        "frontend-file-summaries.txt: \"frontend/src/pages/DashboardPage.tsx\": \"Dashboard page with KPIs, analytics summary, charts, and chatbot...\""
       ]
     },
     {
-      "description": "Settings page change: removed hardcoded default strategyPresets value to force explicit user management.",
-      "reason": "Not explicitly requested; requirements focus on wiring presets into Journal strategy dropdown and parsing/typing/empty-state handling.",
+      "description": "Tools page with six calculators and synchronized tool selection UI.",
+      "reason": "New calculators/tools are explicitly called out as non-goals unrelated to fixing startup/loading.",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/src/pages/SettingsPage.tsx)"
+        "frontend-file-summaries.txt: \"frontend/src/pages/ToolsPage.tsx\": \"Tools page with ... tabs for six calculators...\""
       ]
     }
   ],
-  "confidence": 0.63,
+  "confidence": 0.66,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/journal/TradeFormDialog.tsx",
-    "frontend/src/domain/types.ts",
-    "frontend/src/pages/SettingsPage.tsx",
-    "frontend/src/utils/strategyPresets.ts",
+    "frontend/src/App.tsx",
+    "frontend/src/app/AuthenticatedApp.tsx",
+    "frontend/src/components/auth/LoginView.tsx",
+    "frontend/src/components/startup/StartupErrorScreen.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useSafeActor.ts",
+    "frontend/src/hooks/useStartupGate.ts",
+    "frontend/src/index.css",
+    "frontend/src/utils/startupErrorClassification.ts",
     "project_state.json"
   ]
 }

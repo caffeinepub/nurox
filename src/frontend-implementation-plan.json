@@ -1,91 +1,135 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Wire Settings Strategy Presets into Journal New Trade Strategy dropdown",
+  "title": "Nurox: Non-blocking startup + safe actor initialization to remove infinite “Initializing…”",
   "requirements": [
     {
-      "id": "REQ-15",
-      "summary": "Source New Trade Strategy dropdown options exclusively from the authenticated user’s saved Settings strategy presets and preserve legacy strategy values when editing.",
+      "id": "REQ-1",
+      "summary": "Remove blocking startup work from the actor creation path so the UI always reaches Login or the authenticated shell quickly, with a recoverable error state on failures.",
       "acceptanceCriteria": [
-        "After saving Settings with strategy presets (e.g., lines: \"Order Block\"), opening Journal → New Trade shows \"Order Block\" as a selectable Strategy option.",
-        "The Strategy dropdown in the New Trade form does not display any hardcoded strategies (e.g., no default list like “Structure Break”, “Other”, etc.) when presets exist; it only displays the saved presets.",
-        "Editing an existing trade still shows the trade’s saved strategy value selected in the Strategy field, even if it is not currently present in presets (no crash)."
+        "When loading the app in a fresh browser session, the UI reaches either the Login screen or the authenticated app shell within 5 seconds on a normal connection (no indefinite spinner).",
+        "Actor initialization does not block on optional admin-only initialization when no admin token is provided.",
+        "If actor initialization fails, the app shows an error state with a recovery action (retry/reload) instead of remaining stuck on “Initializing…” indefinitely."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/journal/TradeFormDialog.tsx",
+          "path": "frontend/src/hooks/useSafeActor.ts",
           "operation": "modify",
-          "description": "Replace the hardcoded Strategy <SelectItem> list with options derived from the user’s saved settings.strategyPresets (via existing useGetSettings hook). Ensure editing mode keeps the trade’s saved strategy selectable/selected even if it is not in current presets (e.g., by injecting the existing value into the rendered options list). Verify the component's usage instructions before implementing."
+          "description": "Implement a non-blocking actor hook that creates the backend actor without awaiting optional admin-only initialization; expose actor availability, error state, and a retry function. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Ensure Settings query/mutation wiring supports immediate UI refresh after Save Settings (e.g., continue invalidating the ['settings'] query on save success and keep cache behavior compatible with the Journal form reading settings)."
+          "description": "Replace internal dependency on the immutable useActor hook with useSafeActor so data hooks cannot indirectly trigger blocking actor startup at runtime; ensure queries remain gated on actor readiness. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/app/AuthenticatedApp.tsx",
+          "operation": "modify",
+          "description": "Switch actor dependency to useSafeActor and ensure authenticated UI can render without being blocked by admin-only initialization; render a recoverable error state when actor/profile init fails. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-16",
-      "summary": "Parse newline-delimited Settings.strategyPresets into a clean, de-duplicated list for the Strategy dropdown.",
+      "id": "REQ-2",
+      "summary": "Add a new `useSafeActor` hook and migrate app call sites off the immutable `useActor` to prevent admin initialization from hanging normal users.",
       "acceptanceCriteria": [
-        "Given a strategy presets textarea value containing blank lines and extra spaces, the New Trade Strategy dropdown shows only non-empty trimmed items.",
-        "Duplicate presets do not render duplicate Strategy options in the dropdown."
+        "A new hook is added (not by editing `frontend/src/hooks/useActor.ts`) that creates the backend actor for anonymous and authenticated identities.",
+        "Any admin-only initialization is gated (only runs when the `caffeineAdminToken` parameter is present and non-empty) and failures are caught and surfaced non-blockingly (e.g., warning state), not causing the actor promise to hang.",
+        "All queries/mutations that previously depended on `useActor()` are updated to use the new hook so the app does not indirectly call the immutable `useActor` at runtime."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/strategyPresets.ts",
-          "operation": "create",
-          "description": "Add a reusable parser utility to convert a newline-delimited strategyPresets string into a clean list: trim each line, drop empty lines, and de-duplicate entries using a single consistent approach across the app (choose and document case-sensitive vs case-insensitive behavior inside the utility)."
+          "path": "frontend/src/hooks/useSafeActor.ts",
+          "operation": "modify",
+          "description": "Create the new hook (without editing frontend/src/hooks/useActor.ts) that: (1) creates an anonymous actor when not authenticated, (2) creates an authenticated actor when identity exists, (3) attempts admin init only when `caffeineAdminToken` is non-empty, and (4) never blocks actor availability on admin init; expose admin-init warning state separately. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/journal/TradeFormDialog.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Use the shared strategy presets parsing utility to build the Strategy dropdown options from settings.strategyPresets, ensuring whitespace/blank lines are handled and duplicates are not rendered. Verify the component's usage instructions before implementing."
+          "description": "Update all React Query hooks in this module to import/use useSafeActor instead of useActor, ensuring no runtime path references useActor. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/app/AuthenticatedApp.tsx",
+          "operation": "modify",
+          "description": "Update authenticated shell to use useSafeActor (not useActor) and to pass through retry/refetch capability to startup error UI. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-17",
-      "summary": "Update frontend typing so TradeFormData.strategy supports dynamic preset strings instead of a fixed union.",
+      "id": "REQ-3",
+      "summary": "Add a timeout-backed authenticated startup gate with a specific English error screen that explains whether actor init vs profile load failed and provides a Retry action without a hard refresh.",
       "acceptanceCriteria": [
-        "The frontend builds without TypeScript errors after making Strategy presets dynamic.",
-        "Saving a trade with a preset strategy stores the selected strategy value into the trade’s entryType field (via existing mapping) and it appears in the Journal table/search as before."
+        "If the authenticated shell is still initializing after a defined timeout (e.g., 15 seconds), it transitions to an error UI instead of continuing to show the spinner.",
+        "The error UI offers a Retry action that re-triggers actor/profile loading and can recover without a full page reload.",
+        "The error UI text is in English and is specific enough to guide debugging (e.g., indicates whether actor creation failed or profile fetch failed)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/domain/types.ts",
+          "path": "frontend/src/hooks/useStartupGate.ts",
           "operation": "modify",
-          "description": "Adjust domain typing to support dynamic strategy values (e.g., remove the fixed Strategy string union and allow TradeFormData.strategy to be a string compatible with preset-driven values)."
+          "description": "Implement a startup gating hook that combines actor + profile loading states, applies a timeout, classifies failure source (actor init vs profile load vs timeout), and exposes a single status model for UI consumption plus a retry trigger. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/journal/TradeFormDialog.tsx",
+          "path": "frontend/src/utils/startupErrorClassification.ts",
           "operation": "modify",
-          "description": "Update form state initialization and Select onValueChange typing to align with the new dynamic strategy type, while keeping existing save flow and mapping behavior intact. Verify the component's usage instructions before implementing."
+          "description": "Implement helper(s) to convert actor/profile errors (and timeouts) into clear English titles/descriptions suitable for the startup error UI, including the most relevant reason string. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/domain/mappers.ts",
+          "path": "frontend/src/components/startup/StartupErrorScreen.tsx",
           "operation": "modify",
-          "description": "Confirm the form-to-backend mapping continues to store the chosen strategy string into the Trade.entryType field without relying on hardcoded strategy enums/unions."
+          "description": "Upgrade StartupErrorScreen to accept structured props (title, description, optional error details, and an onRetry callback) and render a clear English error screen with a Retry action that does not require a hard refresh. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/app/AuthenticatedApp.tsx",
+          "operation": "modify",
+          "description": "Wire the authenticated startup gate: show a themed loading screen during init, switch to StartupErrorScreen on timeout/failure, and implement Retry to re-attempt actor creation and profile loading (via react-query refetch/invalidation) without reloading the page. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-18",
-      "summary": "Handle empty strategy presets by disabling Strategy selection in New Trade and guiding the user to add presets in Settings.",
+      "id": "REQ-4",
+      "summary": "Ensure the Internet Identity provider URL is reliably available at runtime via `process.env.II_URL` using a runtime window shim.",
       "acceptanceCriteria": [
-        "If the saved strategy preset list is empty, the New Trade form does not offer any Strategy options and indicates the user should add strategies in Settings (user-facing text must be in English).",
-        "Users cannot create/add a new strategy from the Journal form; strategies remain managed only via Settings."
+        "`frontend/index.html` sets `window.process.env.II_URL` to `https://identity.ic0.app/#authorize` at runtime.",
+        "Login via Internet Identity opens the correct identity provider URL in a new session.",
+        "No startup code path depends on missing build-time env vars for II URL (the runtime value is sufficient)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/journal/TradeFormDialog.tsx",
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Implement an empty-presets state: when parsed presets list is empty, disable the Strategy Select (no options rendered), show English helper text instructing the user to add strategy presets in Settings, and prevent arbitrary strategy entry from the Journal form. Verify the component's usage instructions before implementing."
+          "description": "Verify and (if needed) adjust the runtime env shim so `window.process.env.II_URL` is always set to the exact value `https://identity.ic0.app/#authorize` before the app bundle runs. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Apply a consistent dark graphite + warm neutral + neon-lime accent theme across login/loading/initializing/error screens without blue/purple accents.",
+      "acceptanceCriteria": [
+        "Login, loading, and error screens share the same visual language (colors, typography, spacing) and look intentional rather than default.",
+        "Accent color usage is consistent across buttons/spinners/alerts and does not use blue/purple as the primary accent.",
+        "No user-facing text regresses to non-English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Tune global theme tokens so the app’s primary/accent colors reflect a neon-lime accent over a dark graphite base with warm neutral surfaces (avoiding blue/purple); ensure the tokens are used consistently by startup/login components. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/pages/SettingsPage.tsx",
+          "path": "frontend/src/components/startup/StartupErrorScreen.tsx",
           "operation": "modify",
-          "description": "Remove any hardcoded default strategyPresets initial value from Settings form state so users explicitly manage strategies via Settings; keep the textarea placeholder for guidance and rely on persisted saved settings for actual presets. Verify the component's usage instructions before implementing."
+          "description": "Align the startup error UI styling with the app theme (graphite surfaces, warm neutrals, neon-lime accents for primary actions; destructive reserved for error iconography). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/auth/LoginView.tsx",
+          "operation": "modify",
+          "description": "Ensure login UI aligns with the same theme language (spacing/typography/surfaces) and uses the neon-lime accent consistently in primary actions while avoiding blue/purple accents. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/app/AuthenticatedApp.tsx",
+          "operation": "modify",
+          "description": "Update authenticated initializing/loading UI to match the same theme as Login/Error (consistent surfaces, typography, and neon-lime accent spinner/button styling). Verify the component's usage instructions before implementing."
         }
       ]
     }

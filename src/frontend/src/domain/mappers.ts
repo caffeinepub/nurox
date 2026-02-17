@@ -1,32 +1,15 @@
-import type { Trade, TradeView, Violation } from '../backend';
-import type { UITrade, TradeFormData } from './types';
-import { calculateRiskAmount, calculateRR, calculateProfitLoss, calculatePercentGainLoss } from '../utils/tradingCalculations';
+import type { Trade, Violation, WinLossResult } from '../backend';
+import type { TradeFormData } from './types';
+import { calculateRiskAmount, calculateRR } from '../utils/tradingCalculations';
 
-export function mapTradeViewToUI(trade: TradeView): UITrade {
-  return {
-    ...trade,
-    tags: [],
-    notes: trade.emotions || '',
-    profitLoss: trade.resultPips,
-    balanceAfter: trade.accountSize,
-    percentGainLoss: 0,
-  };
-}
-
-export function mapFormDataToTrade(
-  formData: TradeFormData,
-  existingId?: string,
-  screenshotUrl?: string
-): Trade {
-  const stopDistance = Math.abs(formData.entryPrice - formData.stopLoss);
-  const pipValue = 0.0001; // Standard for most pairs
+/**
+ * Maps form data to backend Trade type with proper field handling.
+ * Ensures win/loss result and profit/loss amount are correctly signed.
+ */
+export function mapFormDataToTrade(formData: TradeFormData, existingId?: string, screenshotUrl?: string): Trade {
   const riskAmount = calculateRiskAmount(formData.accountBalance, formData.riskPercent);
   const rr = calculateRR(formData.entryPrice, formData.stopLoss, formData.takeProfit);
-  
-  // Calculate P/L if exit data exists (for now, we'll use 0 as placeholder)
-  const profitLoss = 0;
-  const balanceAfter = formData.accountBalance + profitLoss;
-  const percentGainLoss = calculatePercentGainLoss(profitLoss, formData.accountBalance);
+  const stopDistance = Math.abs(formData.entryPrice - formData.stopLoss);
 
   const violations: Violation[] = [];
   if (!formData.structureBreakConfirmed) {
@@ -60,6 +43,15 @@ export function mapFormDataToTrade(
 
   const disciplineScore = ((4 - violations.length) / 4) * 100;
 
+  const winLossResult: WinLossResult = formData.winLossResult !== undefined ? formData.winLossResult : ('win' as WinLossResult);
+
+  let profitLossAmount = formData.profitLossAmount || 0;
+  if (winLossResult === 'loss' && profitLossAmount > 0) {
+    profitLossAmount = -profitLossAmount;
+  } else if (winLossResult === 'win' && profitLossAmount < 0) {
+    profitLossAmount = Math.abs(profitLossAmount);
+  }
+
   return {
     id: existingId || `trade_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     entryTimestamp: BigInt(formData.date.getTime()) * BigInt(1_000_000),
@@ -86,5 +78,11 @@ export function mapFormDataToTrade(
     violations,
     isScreenshot: !!screenshotUrl,
     screenshotUrl,
+    entryPrice: formData.entryPrice,
+    stopLossPrice: formData.stopLoss,
+    takeProfitPrice: formData.takeProfit,
+    grade: formData.tradeGrade,
+    winLossResult,
+    profitLossAmount,
   };
 }
