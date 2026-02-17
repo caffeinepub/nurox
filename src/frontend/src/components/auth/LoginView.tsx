@@ -7,7 +7,7 @@ import { Loader2, AlertCircle, Shield } from 'lucide-react';
 import LoginBranding from './LoginBranding';
 
 /**
- * Login page with Internet Identity authentication using neon-lime accent theme, error handling, and state-based login transitions.
+ * Login page with Internet Identity authentication using gold accent theme, error handling, and state-based login transitions.
  */
 export default function LoginView() {
   const { login, loginStatus, loginError } = useInternetIdentity();
@@ -29,7 +29,7 @@ export default function LoginView() {
   const displayError = localError || (hasError && loginError?.message);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/5 p-4">
+    <div className="unauth-theme min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/5 p-4">
       <Card className="w-full max-w-md border-primary/20 shadow-2xl">
         <CardHeader className="text-center space-y-8 pb-8">
           <LoginBranding />

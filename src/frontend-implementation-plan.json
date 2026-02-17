@@ -1,135 +1,41 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Nurox: Non-blocking startup + safe actor initialization to remove infinite “Initializing…”",
+  "title": "Trading Command Center – Frontend startup retry/backoff & recovery",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Remove blocking startup work from the actor creation path so the UI always reaches Login or the authenticated shell quickly, with a recoverable error state on failures.",
-      "acceptanceCriteria": [
-        "When loading the app in a fresh browser session, the UI reaches either the Login screen or the authenticated app shell within 5 seconds on a normal connection (no indefinite spinner).",
-        "Actor initialization does not block on optional admin-only initialization when no admin token is provided.",
-        "If actor initialization fails, the app shows an error state with a recovery action (retry/reload) instead of remaining stuck on “Initializing…” indefinitely."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useSafeActor.ts",
-          "operation": "modify",
-          "description": "Implement a non-blocking actor hook that creates the backend actor without awaiting optional admin-only initialization; expose actor availability, error state, and a retry function. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Replace internal dependency on the immutable useActor hook with useSafeActor so data hooks cannot indirectly trigger blocking actor startup at runtime; ensure queries remain gated on actor readiness. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/app/AuthenticatedApp.tsx",
-          "operation": "modify",
-          "description": "Switch actor dependency to useSafeActor and ensure authenticated UI can render without being blocked by admin-only initialization; render a recoverable error state when actor/profile init fails. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
       "id": "REQ-2",
-      "summary": "Add a new `useSafeActor` hook and migrate app call sites off the immutable `useActor` to prevent admin initialization from hanging normal users.",
+      "summary": "Add bounded automatic retry/backoff for backend-unavailable startup and ensure Retry Connection fully reinitializes actor + profile without page reload.",
       "acceptanceCriteria": [
-        "A new hook is added (not by editing `frontend/src/hooks/useActor.ts`) that creates the backend actor for anonymous and authenticated identities.",
-        "Any admin-only initialization is gated (only runs when the `caffeineAdminToken` parameter is present and non-empty) and failures are caught and surfaced non-blockingly (e.g., warning state), not causing the actor promise to hang.",
-        "All queries/mutations that previously depended on `useActor()` are updated to use the new hook so the app does not indirectly call the immutable `useActor` at runtime."
+        "When the backend is temporarily unavailable at first load, the app attempts automatic reconnection retries (with a bounded max duration) before presenting the error screen.",
+        "Clicking “Retry Connection” on the startup error screen triggers a fresh actor initialization attempt and profile refetch (no stale error state).",
+        "The startup flow never remains stuck indefinitely in a loading state; it either becomes ready/setup-needed or shows a classified error within the existing timeout guarantees."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useSafeActor.ts",
           "operation": "modify",
-          "description": "Create the new hook (without editing frontend/src/hooks/useActor.ts) that: (1) creates an anonymous actor when not authenticated, (2) creates an authenticated actor when identity exists, (3) attempts admin init only when `caffeineAdminToken` is non-empty, and (4) never blocks actor availability on admin init; expose admin-init warning state separately. Verify the component's usage instructions before implementing."
+          "description": "Implement automatic retry/backoff for actor initialization failures (especially backend-unavailable/reject code scenarios) using bounded retry attempts and delay so transient canister-startup downtime does not immediately surface as a terminal error. Ensure retry state resets cleanly and does not extend beyond the app’s startup timeout guarantees."
         },
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/hooks/useSafeActor.ts",
           "operation": "modify",
-          "description": "Update all React Query hooks in this module to import/use useSafeActor instead of useActor, ensuring no runtime path references useActor. Verify the component's usage instructions before implementing."
+          "description": "Add query invalidation/refetch behavior when the actor instance changes (similar to previous useActor behavior) so dependent queries like the caller profile re-run after an actor is successfully re-created during retries or manual recovery."
         },
-        {
-          "path": "frontend/src/app/AuthenticatedApp.tsx",
-          "operation": "modify",
-          "description": "Update authenticated shell to use useSafeActor (not useActor) and to pass through retry/refetch capability to startup error UI. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Add a timeout-backed authenticated startup gate with a specific English error screen that explains whether actor init vs profile load failed and provides a Retry action without a hard refresh.",
-      "acceptanceCriteria": [
-        "If the authenticated shell is still initializing after a defined timeout (e.g., 15 seconds), it transitions to an error UI instead of continuing to show the spinner.",
-        "The error UI offers a Retry action that re-triggers actor/profile loading and can recover without a full page reload.",
-        "The error UI text is in English and is specific enough to guide debugging (e.g., indicates whether actor creation failed or profile fetch failed)."
-      ],
-      "file_operations": [
         {
           "path": "frontend/src/hooks/useStartupGate.ts",
           "operation": "modify",
-          "description": "Implement a startup gating hook that combines actor + profile loading states, applies a timeout, classifies failure source (actor init vs profile load vs timeout), and exposes a single status model for UI consumption plus a retry trigger. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/utils/startupErrorClassification.ts",
-          "operation": "modify",
-          "description": "Implement helper(s) to convert actor/profile errors (and timeouts) into clear English titles/descriptions suitable for the startup error UI, including the most relevant reason string. Verify the component's usage instructions before implementing."
+          "description": "Adjust the startup gate retry action to represent a full startup re-initialization (actor + profile) by clearing/resetting startup timing state and triggering actor recreation while ensuring profile queries are refreshed once the actor becomes available; keep the flow bounded and never indefinitely loading."
         },
         {
           "path": "frontend/src/components/startup/StartupErrorScreen.tsx",
           "operation": "modify",
-          "description": "Upgrade StartupErrorScreen to accept structured props (title, description, optional error details, and an onRetry callback) and render a clear English error screen with a Retry action that does not require a hard refresh. Verify the component's usage instructions before implementing."
+          "description": "Ensure the “Retry Connection” action can await an async onRetry (startup re-init) and that repeated clicks cannot leave stale retry/loading UI states; keep all user-facing text in English and preserve existing styling."
         },
         {
           "path": "frontend/src/app/AuthenticatedApp.tsx",
           "operation": "modify",
-          "description": "Wire the authenticated startup gate: show a themed loading screen during init, switch to StartupErrorScreen on timeout/failure, and implement Retry to re-attempt actor creation and profile loading (via react-query refetch/invalidation) without reloading the page. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Ensure the Internet Identity provider URL is reliably available at runtime via `process.env.II_URL` using a runtime window shim.",
-      "acceptanceCriteria": [
-        "`frontend/index.html` sets `window.process.env.II_URL` to `https://identity.ic0.app/#authorize` at runtime.",
-        "Login via Internet Identity opens the correct identity provider URL in a new session.",
-        "No startup code path depends on missing build-time env vars for II URL (the runtime value is sufficient)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/index.html",
-          "operation": "modify",
-          "description": "Verify and (if needed) adjust the runtime env shim so `window.process.env.II_URL` is always set to the exact value `https://identity.ic0.app/#authorize` before the app bundle runs. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Apply a consistent dark graphite + warm neutral + neon-lime accent theme across login/loading/initializing/error screens without blue/purple accents.",
-      "acceptanceCriteria": [
-        "Login, loading, and error screens share the same visual language (colors, typography, spacing) and look intentional rather than default.",
-        "Accent color usage is consistent across buttons/spinners/alerts and does not use blue/purple as the primary accent.",
-        "No user-facing text regresses to non-English."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Tune global theme tokens so the app’s primary/accent colors reflect a neon-lime accent over a dark graphite base with warm neutral surfaces (avoiding blue/purple); ensure the tokens are used consistently by startup/login components. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/startup/StartupErrorScreen.tsx",
-          "operation": "modify",
-          "description": "Align the startup error UI styling with the app theme (graphite surfaces, warm neutrals, neon-lime accents for primary actions; destructive reserved for error iconography). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/auth/LoginView.tsx",
-          "operation": "modify",
-          "description": "Ensure login UI aligns with the same theme language (spacing/typography/surfaces) and uses the neon-lime accent consistently in primary actions while avoiding blue/purple accents. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/app/AuthenticatedApp.tsx",
-          "operation": "modify",
-          "description": "Update authenticated initializing/loading UI to match the same theme as Login/Error (consistent surfaces, typography, and neon-lime accent spinner/button styling). Verify the component's usage instructions before implementing."
+          "description": "Wire any updated startup-gate retry signature/behavior into the existing startup error screen so Retry Connection performs a full in-app recovery without requiring a full page reload."
         }
       ]
     }

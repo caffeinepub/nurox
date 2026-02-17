@@ -1,14 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Remove the infinite “Initializing…” startup hang so the app reliably reaches Login or the authenticated UI, and provide a clear recovery path when initialization fails.
+**Goal:** Eliminate the recurring “Backend Service Unavailable / Backend canister is stopped (Reject code: 5)” failure by cleanly rebuilding/redeploying the Motoko backend canister and improving the frontend’s startup recovery behavior so users can reliably reach login.
 
 **Planned changes:**
-- Rebuild the startup/authenticated gate so no blocking work can keep the UI stuck on “Initializing…”, and ensure the app renders Login or the app shell quickly.
-- Add a new non-blocking actor hook (e.g., `useSafeActor`) and migrate app usage away from the immutable `useActor` so actor creation cannot hang for normal users.
-- Gate any admin-only initialization behind a present, non-empty `caffeineAdminToken`, and ensure failures are caught and shown as non-blocking warnings/errors.
-- Add initialization timeout handling (e.g., ~15s) and show an English error screen that indicates whether actor initialization or profile loading failed, with a Retry action that re-attempts without a hard refresh.
-- Ensure Internet Identity provider URL is available at runtime by setting `window.process.env.II_URL` in `frontend/index.html` to `https://identity.ic0.app/#authorize`.
-- Apply a consistent visual theme across login/loading/error screens (dark graphite base, warm neutral surfaces, neon-lime accent; avoid blue/purple), matching the rest of the app’s typography and spacing.
+- Clean rebuild and redeploy the single Motoko backend actor (`backend/main.mo`) to ensure it initializes correctly and responds reliably after deployment.
+- Ensure `healthCheck()` consistently returns `true` during normal use post-deploy, and explicitly reset state if a state-breaking change is required for a clean rebuild.
+- Add frontend automatic retry with backoff (bounded max duration) on initial startup when the backend is temporarily unavailable (e.g., reject code 5/canister stopped) before showing the terminal error screen.
+- Update the “Retry Connection” action on the startup error screen to fully re-initialize startup (fresh actor initialization + profile refetch) without requiring a full page reload, and avoid indefinite loading states.
 
-**User-visible outcome:** On a fresh load, the app reaches Login or the authenticated UI without an indefinite spinner; if startup fails or times out, users see a clear English error message and can tap Retry to recover.
+**User-visible outcome:** Opening the site no longer immediately fails with a canister-stopped error under normal conditions; the app retries briefly if the backend is temporarily unavailable, and “Retry Connection” reliably recovers startup and proceeds to the login flow without manual refreshes.

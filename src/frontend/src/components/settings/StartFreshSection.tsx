@@ -19,8 +19,7 @@ import { Trash2, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 /**
- * Start Fresh section with confirmation dialog that clears all user data
- * and properly resets cached queries following authorization component guidance.
+ * Start Fresh section with gold + black theme matching Dashboard, confirmation dialog that clears all user data and properly resets cached queries.
  */
 export default function StartFreshSection() {
   const startFresh = useStartFresh();
@@ -61,9 +60,9 @@ export default function StartFreshSection() {
       </CardHeader>
       <CardContent className="space-y-4">
         {showSuccess && (
-          <Alert className="border-green-500/50 bg-green-500/10">
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
-            <AlertDescription className="text-green-500">
+          <Alert className="border-yellow-500/50 bg-yellow-500/10">
+            <CheckCircle2 className="h-4 w-4 text-yellow-500" />
+            <AlertDescription className="text-yellow-200">
               All data cleared successfully. Reloading...
             </AlertDescription>
           </Alert>

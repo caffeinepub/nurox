@@ -12,7 +12,7 @@ import StartFreshSection from '../components/settings/StartFreshSection';
 import type { Settings } from '../backend';
 
 /**
- * Settings page with trading defaults, strategy presets, and Start Fresh section that uses actor readiness to prevent startup stalls.
+ * Settings page with gold + black theme matching Dashboard styling, including trading defaults, strategy presets, and Start Fresh section.
  */
 export default function SettingsPage() {
   const { actor } = useActor();
@@ -54,7 +54,7 @@ export default function SettingsPage() {
   if (!actor || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-yellow-500" />
       </div>
     );
   }
@@ -62,14 +62,16 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <SettingsIcon className="h-8 w-8 text-primary" />
+        <SettingsIcon className="h-8 w-8 text-yellow-500" />
         <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
+            Settings
+          </h1>
           <p className="text-muted-foreground">Manage your trading preferences and defaults</p>
         </div>
       </div>
 
-      <Card>
+      <Card className="border-border/40 bg-card/50 backdrop-blur">
         <CardHeader>
           <CardTitle>Trading Defaults</CardTitle>
           <CardDescription>
@@ -111,7 +113,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-border/40 bg-card/50 backdrop-blur">
         <CardHeader>
           <CardTitle>Strategy Presets</CardTitle>
           <CardDescription>
@@ -134,6 +136,7 @@ export default function SettingsPage() {
           onClick={handleSave}
           disabled={!hasChanges || saveSettings.isPending}
           size="lg"
+          className="bg-yellow-500 hover:bg-yellow-600 text-black"
         >
           {saveSettings.isPending ? (
             <>

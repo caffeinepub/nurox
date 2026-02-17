@@ -1,42 +1,20 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project shifted from a new project to a requested full rebuild of the website from scratch, with the goal of eliminating the initializing/loading bug.",
-  "architectural_notes": [],
+  "summary": "Rebuild the backend canister to address recurring connection/login failure (yellow “Retry Connection” screen) when opening the site.",
+  "architectural_notes": [
+    "App runs on the Internet Computer; frontend depends on a backend canister that can temporarily stop, causing connection retry/login failure."
+  ],
   "known_issues": [
-    "App is not loading; stuck on an initializing/loading screen (infinite initialization loop)."
+    "Opening the site can immediately show a yellow “Retry Connection” screen due to the backend canister stopping, preventing login until it recovers/retry is clicked."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-eliminate-the-infinite-initializing-loading-screen-by-removing-any-blocking-startup-work-from-the-actor-creation-path-e-g-admin-access-control-initialization-so-the-app-can-always-render-login-or-the-authenticated-ui-without-hanging",
-      "title": "Eliminate the infinite initializing/loading screen by removing any blocking startup work from the actor creation path (e.g., admin access-control initialization) so the app can always render Login or the authenticated UI without hanging.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-a-new-non-blocking-actor-hook-e-g-usesafeactor-that-replaces-usage-of-the-immutable-useactor-hook-across-the-app-ensuring-actor-creation-succeeds-for-normal-users-and-admin-initialization-is-attempted-only-when-an-admin-token-is-present-and-can-fail-safely-without-blocking",
-      "title": "Implement a new non-blocking actor hook (e.g., `useSafeActor`) that replaces usage of the immutable `useActor` hook across the app, ensuring actor creation succeeds for normal users and admin initialization is attempted only when an admin token is present and can fail safely without blocking.",
+      "id": "feature-improve-the-frontend-startup-recovery-behavior-for-backend-unavailable-scenarios-e-g-reject-code-5-canister-stopped-by-adding-automatic-retry-backoff-before-showing-the-terminal-error-screen-and-ensure-the-retry-connection-action-fully-re-initializes-startup-actor-profile-without-requiring-a-full-page-reload",
+      "title": "Improve the frontend startup recovery behavior for backend-unavailable scenarios (e.g., reject code 5 / canister stopped) by adding automatic retry/backoff before showing the terminal error screen, and ensure the “Retry Connection” action fully re-initializes startup (actor + profile) without requiring a full page reload.",
       "reqIds": [
         "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-authenticated-startup-gate-so-it-cannot-display-initializing-forever-add-a-timeout-and-show-a-clear-english-error-screen-that-includes-the-most-relevant-failure-reason-actor-init-vs-profile-load-and-provides-a-retry-action-that-re-attempts-initialization-without-requiring-a-hard-refresh",
-      "title": "Update the authenticated startup gate so it cannot display “Initializing…” forever: add a timeout and show a clear English error screen that includes the most relevant failure reason (actor init vs profile load) and provides a Retry action that re-attempts initialization without requiring a hard refresh.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-a-coherent-visual-theme-consistently-across-the-rebuilt-startup-login-initializing-error-screens-dark-graphite-base-with-warm-neutral-surfaces-and-a-neon-lime-accent-avoid-blue-purple-keeping-typography-and-spacing-consistent-with-the-rest-of-the-app-ui",
-      "title": "Apply a coherent visual theme consistently across the rebuilt startup/login/initializing/error screens (dark graphite base with warm neutral surfaces and a neon-lime accent; avoid blue/purple), keeping typography and spacing consistent with the rest of the app UI.",
-      "reqIds": [
-        "REQ-5"
       ],
       "version": 1
     }
@@ -44,26 +22,20 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Rebuild the website from scratch with new code (clean rebuild).",
+      "summary": "Rebuild the backend canister cleanly to resolve recurring “Retry Connection”/login failure on site load.",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Fix the infinite initializing/loading screen bug so the app loads correctly.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Ensure the Internet Identity provider URL is reliably available at runtime as `process.env.II_URL` (exact value `https://identity.ic0.app/#authorize`) so the existing immutable Internet Identity hook can initialize consistently across rebuilds.",
+      "summary": "Rebuild and redeploy the Motoko backend canister cleanly so the app no longer opens to a recurring “Backend Service Unavailable / Backend canister is stopped (Reject code: 5)” screen on initial load, and the canister responds reliably to requests after deployment.",
       "reqIds": [
-        "REQ-4"
+        "REQ-1"
       ],
       "status": "pending"
     }
   ],
-  "projectName": "Nurox",
+  "projectName": "Trading Command Center",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

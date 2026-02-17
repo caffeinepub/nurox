@@ -2,34 +2,13 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-eliminate-the-infinite-initializing-loading-screen-by-removing-any-blocking-startup-work-from-the-actor-creation-path-e-g-admin-access-control-initialization-so-the-app-can-always-render-login-or-the-authenticated-ui-without-hanging",
-      "featureTitle": "Eliminate the infinite initializing/loading screen by removing any blocking startup work from the actor creation path (e.g., admin access-control initialization) so the app can always render Login or the authenticated UI without hanging.",
+      "featureId": "feature-improve-the-frontend-startup-recovery-behavior-for-backend-unavailable-scenarios-e-g-reject-code-5-canister-stopped-by-adding-automatic-retry-backoff-before-showing-the-terminal-error-screen-and-ensure-the-retry-connection-action-fully-re-initializes-startup-actor-profile-without-requiring-a-full-page-reload",
+      "featureTitle": "Improve the frontend startup recovery behavior for backend-unavailable scenarios (e.g., reject code 5 / canister stopped) by adding automatic retry/backoff before showing the terminal error screen, and ensure the “Retry Connection” action fully re-initializes startup (actor + profile) without requiring a full page reload.",
       "files": [
         "frontend/src/app/AuthenticatedApp.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/hooks/useSafeActor.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-a-new-non-blocking-actor-hook-e-g-usesafeactor-that-replaces-usage-of-the-immutable-useactor-hook-across-the-app-ensuring-actor-creation-succeeds-for-normal-users-and-admin-initialization-is-attempted-only-when-an-admin-token-is-present-and-can-fail-safely-without-blocking",
-      "featureTitle": "Implement a new non-blocking actor hook (e.g., `useSafeActor`) that replaces usage of the immutable `useActor` hook across the app, ensuring actor creation succeeds for normal users and admin initialization is attempted only when an admin token is present and can fail safely without blocking.",
-      "files": [
-        "frontend/src/app/AuthenticatedApp.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/hooks/useSafeActor.ts"
+        "frontend/src/components/startup/StartupErrorScreen.tsx",
+        "frontend/src/hooks/useSafeActor.ts",
+        "frontend/src/hooks/useStartupGate.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -42,52 +21,6 @@
       ],
       "testIds": [
         "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-authenticated-startup-gate-so-it-cannot-display-initializing-forever-add-a-timeout-and-show-a-clear-english-error-screen-that-includes-the-most-relevant-failure-reason-actor-init-vs-profile-load-and-provides-a-retry-action-that-re-attempts-initialization-without-requiring-a-hard-refresh",
-      "featureTitle": "Update the authenticated startup gate so it cannot display “Initializing…” forever: add a timeout and show a clear English error screen that includes the most relevant failure reason (actor init vs profile load) and provides a Retry action that re-attempts initialization without requiring a hard refresh.",
-      "files": [
-        "frontend/src/app/AuthenticatedApp.tsx",
-        "frontend/src/components/startup/StartupErrorScreen.tsx",
-        "frontend/src/hooks/useStartupGate.ts",
-        "frontend/src/utils/startupErrorClassification.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-apply-a-coherent-visual-theme-consistently-across-the-rebuilt-startup-login-initializing-error-screens-dark-graphite-base-with-warm-neutral-surfaces-and-a-neon-lime-accent-avoid-blue-purple-keeping-typography-and-spacing-consistent-with-the-rest-of-the-app-ui",
-      "featureTitle": "Apply a coherent visual theme consistently across the rebuilt startup/login/initializing/error screens (dark graphite base with warm neutral surfaces and a neon-lime accent; avoid blue/purple), keeping typography and spacing consistent with the rest of the app UI.",
-      "files": [
-        "frontend/src/app/AuthenticatedApp.tsx",
-        "frontend/src/components/auth/LoginView.tsx",
-        "frontend/src/components/startup/StartupErrorScreen.tsx",
-        "frontend/src/index.css"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
       ],
       "confidence": "high"
     }

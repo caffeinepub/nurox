@@ -1,54 +1,43 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T07:03:41.727Z",
-  "summary": "Most startup-flow requirements appear implemented via new non-blocking actor hook (useSafeActor), a startup gate with timeout and retry (useStartupGate), and a dedicated error screen; however, the runtime Internet Identity URL injection (process.env.II_URL via index.html) is not evidenced in the diff. The diff summary also suggests unrelated new/expanded UI features (e.g., navigation entries, dashboards/tools) that are outside the stated non-goals.",
-  "missing_requirements": [
-    {
-      "id": "REQ-4",
-      "requirement": "Ensure the Internet Identity provider URL is reliably available at runtime as process.env.II_URL (exact value https://identity.ic0.app/#authorize) by setting window.process.env.II_URL in frontend/index.html.",
-      "reason": "No changes to frontend/index.html (or any runtime env injection) are shown in the diff summary, so the required runtime definition of window.process.env.II_URL is not evidenced.",
-      "evidence": [
-        "File diff summary shows no modified/added frontend/index.html"
-      ]
-    }
-  ],
+  "generatedAt": "2026-02-17T08:16:31.929Z",
+  "summary": "REQ-2 (frontend startup recovery with auto retry/backoff and retry re-init) appears implemented via new startup gate logic and safe actor initialization with retries/timeouts. REQ-1 (backend healthCheck reliability / clean rebuild) is partially evidenced by a healthCheck() returning true, but the diff does not provide enough evidence about clean redeploy/state reset behavior. Several UI/theme and navigation changes appear unrelated to the request and include a Settings page theme change that conflicts with stated non-goals.",
+  "missing_requirements": [],
   "hallucinated_features": [
     {
-      "description": "Added/changed navigation item \"About Me\" in the app shell navigation.",
-      "reason": "This is a new product feature unrelated to fixing startup/loading and is explicitly outside the scope (non-goals).",
+      "description": "Changed Settings page styling/theme (gold + black theme matching Dashboard styling).",
+      "reason": "BuildRequest explicitly states a non-goal: \"Do not change the Settings page styling/theme as part of this rebuild request.\" The diff summary indicates SettingsPage styling/theme was changed.",
       "evidence": [
-        "frontend-file-summaries.txt: \"frontend/src/components/shell/SideNav.tsx\": \"...including new \\\"About Me\\\" entry...\"",
-        "frontend-file-summaries.txt: \"frontend/src/components/shell/MobileNav.tsx\": \"...navigation items including About Me...\""
+        "frontend-file-summaries.txt (\"frontend/src/pages/SettingsPage.tsx\": \"Settings page with gold + black theme matching Dashboard styling...\")"
       ]
     },
     {
-      "description": "Dashboard enhancements including KPIs/analytics/charts and a chatbot.",
-      "reason": "This constitutes new dashboard modules/features, which are listed as non-goals unrelated to fixing startup/loading.",
+      "description": "Introduced a new `.unauth-theme` wrapper and gold accent theme tokens for unauthenticated/startup gating screens.",
+      "reason": "The request focuses on startup recovery behavior (retry/backoff, re-init without reload) and does not request theme/token changes.",
       "evidence": [
-        "frontend-file-summaries.txt: \"frontend/src/pages/DashboardPage.tsx\": \"Dashboard page with KPIs, analytics summary, charts, and chatbot...\""
+        "frontend/src/app/AuthenticatedApp.tsx (wraps startup states in `unauth-theme` and mentions gold accent theme in comment)",
+        "frontend-file-summaries.txt (\"frontend/src/index.css\": \"new `.unauth-theme` wrapper class that overrides ... tokens to gold\")"
       ]
     },
     {
-      "description": "Tools page with six calculators and synchronized tool selection UI.",
-      "reason": "New calculators/tools are explicitly called out as non-goals unrelated to fixing startup/loading.",
+      "description": "Added/modified navigation and layout UI features (e.g., new \"About Me\" nav entry; logo loading resilience changes) not requested by the rebuild/retry requirements.",
+      "reason": "BuildRequest requirements only cover backend canister reliability and frontend startup retry behavior; navigation/menu/logo feature work is out of scope.",
       "evidence": [
-        "frontend-file-summaries.txt: \"frontend/src/pages/ToolsPage.tsx\": \"Tools page with ... tabs for six calculators...\""
+        "frontend-file-summaries.txt (\"frontend/src/components/shell/SideNav.tsx\": \"including new \\\"About Me\\\" entry...\")",
+        "frontend-file-summaries.txt (\"frontend/src/components/shell/TopBar.tsx\": \"...resilient image loading...\")",
+        "frontend-file-summaries.txt (\"frontend/src/components/shell/MobileNav.tsx\": \"...resilient image loading...\")"
       ]
     }
   ],
   "confidence": 0.66,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
     "frontend/src/app/AuthenticatedApp.tsx",
-    "frontend/src/components/auth/LoginView.tsx",
     "frontend/src/components/startup/StartupErrorScreen.tsx",
-    "frontend/src/hooks/useQueries.ts",
     "frontend/src/hooks/useSafeActor.ts",
     "frontend/src/hooks/useStartupGate.ts",
-    "frontend/src/index.css",
-    "frontend/src/utils/startupErrorClassification.ts",
     "project_state.json"
   ]
 }

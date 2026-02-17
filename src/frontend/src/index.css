@@ -109,6 +109,15 @@
         --sidebar-ring: 0.708 0 0;
     }
 
+    /* Unauthenticated theme wrapper - gold + black accent override */
+    .unauth-theme {
+        --primary: 0.82 0.18 88;
+        --primary-foreground: 0.145 0 0;
+        --ring: 0.82 0.18 88;
+        --accent: 0.82 0.18 88 / 10%;
+        --accent-foreground: 0.82 0.18 88;
+    }
+
     * {
         @apply border-border;
     }

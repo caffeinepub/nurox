@@ -1,104 +1,53 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T07:03:41.730Z",
+  "generatedAt": "2026-02-17T08:16:31.932Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 4,
+    "total": 2,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Eliminate the infinite initializing/loading screen by removing any blocking startup work from the actor creation path (e.g., admin access-control initialization) so the app can always render Login or the authenticated UI without hanging.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useSafeActor.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/app/AuthenticatedApp.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useSafeActor.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/app/AuthenticatedApp.tsx"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Implement a new non-blocking actor hook (e.g., `useSafeActor`) that replaces usage of the immutable `useActor` hook across the app, ensuring actor creation succeeds for normal users and admin initialization is attempted only when an admin token is present and can fail safely without blocking.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useSafeActor.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/app/AuthenticatedApp.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useSafeActor.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/app/AuthenticatedApp.tsx"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Update the authenticated startup gate so it cannot display “Initializing…” forever: add a timeout and show a clear English error screen that includes the most relevant failure reason (actor init vs profile load) and provides a Retry action that re-attempts initialization without requiring a hard refresh.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useStartupGate.ts",
-          "frontend/src/utils/startupErrorClassification.ts",
-          "frontend/src/components/startup/StartupErrorScreen.tsx",
-          "frontend/src/app/AuthenticatedApp.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useStartupGate.ts",
-          "frontend/src/utils/startupErrorClassification.ts",
-          "frontend/src/components/startup/StartupErrorScreen.tsx",
-          "frontend/src/app/AuthenticatedApp.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Ensure the Internet Identity provider URL is reliably available at runtime as `process.env.II_URL` (exact value `https://identity.ic0.app/#authorize`) so the existing immutable Internet Identity hook can initialize consistently across rebuilds.",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/index.html"
-        ],
+        "summary": "Rebuild and redeploy the Motoko backend canister cleanly so the app no longer opens to a recurring “Backend Service Unavailable / Backend canister is stopped (Reject code: 5)” screen on initial load, and the canister responds reliably to requests after deployment.",
+        "status": "unknown",
+        "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-5",
-        "summary": "Apply a coherent visual theme consistently across the rebuilt startup/login/initializing/error screens (dark graphite base with warm neutral surfaces and a neon-lime accent; avoid blue/purple), keeping typography and spacing consistent with the rest of the app UI.",
+        "id": "REQ-2",
+        "summary": "Improve the frontend startup recovery behavior for backend-unavailable scenarios (e.g., reject code 5 / canister stopped) by adding automatic retry/backoff before showing the terminal error screen, and ensure the “Retry Connection” action fully re-initializes startup (actor + profile) without requiring a full page reload.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/index.css",
+          "frontend/src/hooks/useSafeActor.ts",
+          "frontend/src/hooks/useSafeActor.ts",
+          "frontend/src/hooks/useStartupGate.ts",
           "frontend/src/components/startup/StartupErrorScreen.tsx",
-          "frontend/src/components/auth/LoginView.tsx",
           "frontend/src/app/AuthenticatedApp.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/index.css",
+          "frontend/src/hooks/useSafeActor.ts",
+          "frontend/src/hooks/useSafeActor.ts",
+          "frontend/src/hooks/useStartupGate.ts",
           "frontend/src/components/startup/StartupErrorScreen.tsx",
-          "frontend/src/components/auth/LoginView.tsx",
           "frontend/src/app/AuthenticatedApp.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
     "frontend/src/app/AuthenticatedApp.tsx",
-    "frontend/src/components/auth/LoginView.tsx",
     "frontend/src/components/startup/StartupErrorScreen.tsx",
-    "frontend/src/hooks/useQueries.ts",
     "frontend/src/hooks/useSafeActor.ts",
     "frontend/src/hooks/useStartupGate.ts",
-    "frontend/src/index.css",
-    "frontend/src/utils/startupErrorClassification.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

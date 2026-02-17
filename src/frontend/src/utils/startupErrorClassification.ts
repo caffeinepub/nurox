@@ -1,4 +1,7 @@
-export type ErrorCategory = 'connection' | 'profile' | 'authorization' | 'timeout' | 'unknown';
+import { getErrorMessage } from './getErrorMessage';
+import { parseICRejectError, isBackendUnavailableError } from './icRejectParsing';
+
+export type ErrorCategory = 'connection' | 'profile' | 'authorization' | 'timeout' | 'backend-unavailable' | 'unknown';
 
 export interface ClassifiedError {
   category: ErrorCategory;
@@ -8,7 +11,7 @@ export interface ClassifiedError {
 }
 
 /**
- * Utility that classifies startup errors into categories (connection, profile, authorization, timeout, unknown) for appropriate UI handling.
+ * Utility that classifies startup errors into categories (connection, profile, authorization, timeout, backend-unavailable, unknown) with structured error information for appropriate UI handling.
  */
 export function classifyStartupError(error: Error | null, context?: string): ClassifiedError {
   if (!error) {
@@ -20,6 +23,18 @@ export function classifyStartupError(error: Error | null, context?: string): Cla
   }
 
   const message = error.message.toLowerCase();
+  const icRejectDetails = parseICRejectError(error);
+  const isBackendUnavailable = isBackendUnavailableError(error);
+
+  // Backend unavailable/stopped errors (highest priority)
+  if (isBackendUnavailable) {
+    return {
+      category: 'backend-unavailable',
+      title: 'Backend Service Unavailable',
+      description: 'The backend service is currently stopped or unavailable. This usually means the canister needs to be restarted. Please wait a moment and try again, or contact support if the issue persists.',
+      technicalDetails: icRejectDetails || getErrorMessage(error),
+    };
+  }
 
   // Timeout errors
   if (message.includes('timeout')) {
@@ -27,7 +42,7 @@ export function classifyStartupError(error: Error | null, context?: string): Cla
       category: 'timeout',
       title: 'Connection Timeout',
       description: 'The application took too long to connect. This may be due to network issues or high server load.',
-      technicalDetails: error.message,
+      technicalDetails: icRejectDetails || getErrorMessage(error),
     };
   }
 
@@ -43,7 +58,7 @@ export function classifyStartupError(error: Error | null, context?: string): Cla
       category: 'connection',
       title: 'Connection Failed',
       description: 'Unable to connect to the backend service. Please check your internet connection and try again.',
-      technicalDetails: error.message,
+      technicalDetails: icRejectDetails || getErrorMessage(error),
     };
   }
 
@@ -58,7 +73,7 @@ export function classifyStartupError(error: Error | null, context?: string): Cla
       category: 'authorization',
       title: 'Authorization Error',
       description: 'There was a problem verifying your identity. Please try logging in again.',
-      technicalDetails: error.message,
+      technicalDetails: icRejectDetails || getErrorMessage(error),
     };
   }
 
@@ -68,7 +83,7 @@ export function classifyStartupError(error: Error | null, context?: string): Cla
       category: 'profile',
       title: 'Profile Load Failed',
       description: 'Unable to load your user profile. Your data is safe, but we need to retry the connection.',
-      technicalDetails: error.message,
+      technicalDetails: icRejectDetails || getErrorMessage(error),
     };
   }
 
@@ -77,6 +92,6 @@ export function classifyStartupError(error: Error | null, context?: string): Cla
     category: 'unknown',
     title: 'Startup Error',
     description: 'An unexpected error occurred while starting the application. Please try again.',
-    technicalDetails: error.message,
+    technicalDetails: icRejectDetails || getErrorMessage(error),
   };
 }

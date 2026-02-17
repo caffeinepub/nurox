@@ -7,11 +7,11 @@ interface StartupErrorScreenProps {
   title?: string;
   description?: string;
   technicalDetails?: string;
-  onRetry?: () => void;
+  onRetry?: () => Promise<void> | void;
 }
 
 /**
- * Full-screen error component with structured error display (title, description, technical details) and retry action that attempts recovery without page reload.
+ * Full-screen error component with structured error display (title, description, technical details) and async retry action that attempts recovery without page reload; supports backend unavailable/stopped error differentiation and uses gold accent theme for retry button.
  */
 export default function StartupErrorScreen({ 
   title = 'Initialization Failed',
@@ -22,16 +22,22 @@ export default function StartupErrorScreen({
   const [isRetrying, setIsRetrying] = useState(false);
 
   const handleRetry = async () => {
+    if (isRetrying) return;
+    
     setIsRetrying(true);
     try {
       if (onRetry) {
         await onRetry();
+        // Give the retry a moment to take effect
+        await new Promise(resolve => setTimeout(resolve, 500));
       } else {
         window.location.reload();
       }
+    } catch (error) {
+      console.error('Retry failed:', error);
     } finally {
-      // Reset after a delay to allow state to update
-      setTimeout(() => setIsRetrying(false), 1000);
+      // Reset retry state after a delay
+      setTimeout(() => setIsRetrying(false), 2000);
     }
   };
 
@@ -55,7 +61,7 @@ export default function StartupErrorScreen({
 
         {technicalDetails && (
           <Alert variant="destructive" className="text-left">
-            <AlertDescription className="text-xs font-mono break-all">
+            <AlertDescription className="text-xs font-mono break-all whitespace-pre-wrap">
               {technicalDetails}
             </AlertDescription>
           </Alert>

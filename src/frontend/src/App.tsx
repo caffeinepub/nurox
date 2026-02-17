@@ -10,7 +10,7 @@ import { Loader2 } from 'lucide-react';
 const queryClient = createAppQueryClient();
 
 /**
- * Root application component with authentication gate that shows LoginView when unauthenticated and AuthenticatedApp when authenticated; identity initialization is non-blocking with a simple loading state.
+ * Root application component with authentication gate that shows LoginView when unauthenticated and AuthenticatedApp when authenticated; identity initialization is non-blocking with a simple loading state using gold accent theme for unauthenticated screens.
  */
 export default function App() {
   const { identity, isInitializing } = useInternetIdentity();
@@ -19,7 +19,7 @@ export default function App() {
   // Show minimal loading only during initial identity check
   if (isInitializing) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="unauth-theme min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
           <p className="text-sm text-muted-foreground">Loading...</p>
